@@ -1,0 +1,20 @@
+# Build outputs
+bin/
+obj/
+# User-specific
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+# IDE
+.vs/
+.idea/
+.vscode/
+# Logs
+*.log
+# Publish
+*.pubxml
+*.pubxml.user
+# Others
+*.swp

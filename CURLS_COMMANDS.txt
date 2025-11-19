@@ -1,0 +1,353 @@
+=============================================================================================================================================
+COMANDOS CURL PARA PROBAR LA API
+UyanycarusaService - Puerto 5001
+=============================================================================================================================================
+
+NOTA: Primero debes obtener un token JWT usando el endpoint de Auth/login
+y luego usar ese token en el header "Authorization: Bearer {token}" 
+para todos los demás endpoints.
+
+=============================================================================================================================================
+
+0. AuthService
+
+path: /api/v1/Auth/login
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/Auth/login" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"admin\",\"password\":\"password123\"}"
+
+=============================================================================================================================================
+
+1. VehiclesService
+
+1.1 VehiclesService
+path: /api/v1/Vehicles/years
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Vehicles/years" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+1.2 VehiclesService
+path: /api/v1/Vehicles/makes/{year}
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Vehicles/makes/2020" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+1.3 VehiclesService
+path: /api/v1/Vehicles/models/{year}/{make}
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Vehicles/models/2020/Toyota" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+=============================================================================================================================================
+
+2. ValuationService
+
+2.1 ValuationService
+path: /api/v1/Valuation
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/Valuation" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"year\":2020,\"make\":\"Toyota\",\"model\":\"Camry\",\"mileage\":50000,\"zipCode\":\"33101\"}"
+
+--------------------------------------------------------------------------
+
+2.2 ValuationService
+path: /api/v1/Valuation/with-damage
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/Valuation/with-damage" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"year\":2020,\"make\":\"Toyota\",\"model\":\"Camry\",\"mileage\":50000,\"zipCode\":\"33101\",\"damages\":[{\"type\":\"Scratch\",\"location\":\"Front Bumper\",\"severity\":\"Minor\"}]}"
+
+=============================================================================================================================================
+
+3. AppointmentService
+
+3.1 AppointmentService
+path: /api/v1/Appointment/availability/{zipCode}/{customerVehicleId}
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Appointment/availability/33101/123" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+3.2 AppointmentService
+path: /api/v1/Appointment/book
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/Appointment/book" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"customerVehicleId\":123,\"zipCode\":\"33101\",\"appointmentDate\":\"2025-01-20\",\"timeSlotId\":101,\"customerName\":\"John Doe\",\"phoneNumber\":\"+15551234567\"}"
+
+--------------------------------------------------------------------------
+
+3.3 AppointmentService
+path: /api/v1/Appointment/{existingAppointmentId}/reschedule
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/Appointment/456/reschedule" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"customerVehicleId\":123,\"zipCode\":\"33101\",\"appointmentDate\":\"2025-01-25\",\"timeSlotId\":102,\"customerName\":\"John Doe\",\"phoneNumber\":\"+15551234567\"}"
+
+--------------------------------------------------------------------------
+
+3.4 AppointmentService
+path: /api/v1/Appointment/cancel/{customerVehicleId}/{phoneNumber}
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/Appointment/cancel/123/15551234567" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+=============================================================================================================================================
+
+4. CustomerJourneyService
+
+4.1 CustomerJourneyService
+path: /api/v1/CustomerJourney (POST con YMM)
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/CustomerJourney" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"year\":2020,\"make\":\"Toyota\",\"model\":\"Camry\"}"
+
+--------------------------------------------------------------------------
+
+4.2 CustomerJourneyService
+path: /api/v1/CustomerJourney/vin
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/CustomerJourney/vin" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"vin\":\"1HGBH41JXMN109186\"}"
+
+--------------------------------------------------------------------------
+
+4.3 CustomerJourneyService
+path: /api/v1/CustomerJourney/plate
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/CustomerJourney/plate" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"plateNumber\":\"ABC1234\",\"state\":\"FL\"}"
+
+--------------------------------------------------------------------------
+
+4.4 CustomerJourneyService
+path: /api/v1/CustomerJourney/{id} (GET por UUID o visitId)
+
+CURL (con UUID):
+curl -X GET "http://localhost:5001/api/v1/CustomerJourney/550e8400-e29b-41d4-a716-446655440000" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+CURL (con visitId integer):
+curl -X GET "http://localhost:5001/api/v1/CustomerJourney/12345" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+4.5 CustomerJourneyService
+path: /api/v1/CustomerJourney/{id}/vehicle-details
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/CustomerJourney/550e8400-e29b-41d4-a716-446655440000/vehicle-details" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"mileage\":50000,\"color\":\"Blue\",\"transmission\":\"Automatic\",\"engine\":\"2.5L\"}"
+
+--------------------------------------------------------------------------
+
+4.6 CustomerJourneyService
+path: /api/v1/CustomerJourney/{customerJourneyId}/damage/options
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/CustomerJourney/550e8400-e29b-41d4-a716-446655440000/damage/options" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+4.7 CustomerJourneyService
+path: /api/v1/CustomerJourney/{id}/vehicle-condition
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/CustomerJourney/550e8400-e29b-41d4-a716-446655440000/vehicle-condition" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"condition\":\"Good\",\"hasAccidents\":false,\"accidentCount\":0}"
+
+--------------------------------------------------------------------------
+
+4.8 CustomerJourneyService
+path: /api/v1/CustomerJourney/{id}/body-work
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/CustomerJourney/550e8400-e29b-41d4-a716-446655440000/body-work" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"hasBodyWork\":true,\"bodyWorkDetails\":[{\"location\":\"Front Bumper\",\"type\":\"Repair\",\"description\":\"Minor scratch repair\"}]}"
+
+=============================================================================================================================================
+
+5. ContentService
+
+5.1 ContentService
+path: /api/v1/Content/branches
+
+CURL (sin parámetros):
+curl -X GET "http://localhost:5001/api/v1/Content/branches" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+CURL (con parámetros opcionales):
+curl -X GET "http://localhost:5001/api/v1/Content/branches?ZipCode=33101&Limit=10&BranchType=Physical" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+5.2 ContentService
+path: /api/v1/Content/branches/{branchId}
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Content/branches/101" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+5.3 ContentService
+path: /api/v1/Content/faqs
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Content/faqs" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+5.4 ContentService
+path: /api/v1/Content/faqs/{slug}
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Content/faqs/valuation-process" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+5.5 ContentService
+path: /api/v1/Content/landing-page
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Content/landing-page" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+5.6 ContentService
+path: /api/v1/Content/landing-page/{slug}
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Content/landing-page/sell-your-car" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+5.7 ContentService
+path: /api/v1/Content/make-model/{make}
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Content/make-model/Toyota" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+5.8 ContentService
+path: /api/v1/Content/make-model/{make}/{model}
+
+CURL:
+curl -X GET "http://localhost:5001/api/v1/Content/make-model/Toyota/Camry" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+=============================================================================================================================================
+
+6. AttributionService
+
+6.1 AttributionService
+path: /api/v1/Attribution/visitor
+
+CURL (crear nuevo visitor):
+curl -X POST "http://localhost:5001/api/v1/Attribution/visitor" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+CURL (con oldVisitorId para migración):
+curl -X POST "http://localhost:5001/api/v1/Attribution/visitor?oldVisitorId=123456789" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json"
+
+--------------------------------------------------------------------------
+
+6.2 AttributionService
+path: /api/v1/Attribution/visitor/{visitorId}/visit
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/Attribution/visitor/123456789/visit" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"pageUrl\":\"https://www.webuyanycarusa.com/valuation\",\"referrerUrl\":\"https://www.google.com\",\"userAgent\":\"Mozilla/5.0\",\"ipAddress\":\"192.168.1.1\",\"timestamp\":\"2025-01-15T10:30:00Z\"}"
+
+=============================================================================================================================================
+
+7. SchedulingService
+
+7.1 SchedulingService
+path: /api/v1/scheduling/otp/request
+
+CURL:
+curl -X POST "http://localhost:5001/api/v1/scheduling/otp/request" ^
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"phoneNumber\":\"+15551234567\",\"purpose\":\"AppointmentConfirmation\"}"
+
+=============================================================================================================================================
+
+INSTRUCCIONES DE USO:
+
+1. Primero ejecuta el CURL del Auth/login para obtener un token
+2. Copia el token de la respuesta (campo "token")
+3. Reemplaza "YOUR_TOKEN_HERE" en todos los demás CURLs con el token obtenido
+4. Ejecuta los CURLs según necesites probar cada endpoint
+
+NOTA: Los caracteres ^ al final de cada línea son para Windows PowerShell/CMD.
+      Si usas Linux/Mac, reemplázalos con \ y elimina los espacios antes del ^
+
