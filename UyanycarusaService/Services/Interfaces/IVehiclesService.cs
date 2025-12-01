@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace UyanycarusaService.Services
 {
     /// <summary>
@@ -25,6 +27,22 @@ namespace UyanycarusaService.Services
         /// <param name="make">Marca del vehículo</param>
         /// <returns>Lista de modelos disponibles</returns>
         Task<List<string>> GetModelsAsync(int year, string make);
+
+        /// <summary>
+        /// Obtiene la lista de trims (versiones/equipamientos) disponibles para un año, marca y modelo específicos desde el servicio externo
+        /// </summary>
+        /// <param name="year">Año del vehículo</param>
+        /// <param name="make">Marca del vehículo</param>
+        /// <param name="model">Modelo del vehículo</param>
+        /// <returns>Lista de trims disponibles como JSON</returns>
+        Task<JsonElement> GetTrimsAsync(int year, string make, string model);
+
+        /// <summary>
+        /// Obtiene una imagen desde una URL externa
+        /// </summary>
+        /// <param name="imageUrl">URL de la imagen a obtener</param>
+        /// <returns>Tupla con el contenido de la imagen (bytes) y el tipo de contenido (content type)</returns>
+        Task<(byte[] content, string contentType)> GetImageAsync(string imageUrl);
     }
 }
 

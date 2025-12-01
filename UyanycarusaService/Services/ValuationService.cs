@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using System.Text.Json;
-using UyanycarusaService.ModelsTests;
 
 namespace UyanycarusaService.Services
 {
@@ -11,13 +11,13 @@ namespace UyanycarusaService.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ValuationService> _logger;
-        private readonly bool _useTestData;
+        private readonly ITokenService _tokenService;
 
-        public ValuationService(IHttpClientFactory httpClientFactory, ILogger<ValuationService> logger, IConfiguration configuration)
+        public ValuationService(IHttpClientFactory httpClientFactory, ILogger<ValuationService> logger, IConfiguration configuration, ITokenService tokenService)
         {
             _httpClient = httpClientFactory.CreateClient("WebuyAnyCarApi");
             _logger = logger;
-            _useTestData = configuration.GetValue<bool>("dataTest");
+            _tokenService = tokenService;
         }
 
         /// <inheritdoc />
@@ -25,38 +25,32 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Enviando valuación básica al servicio externo /Valuation");
 
-                using var response = await _httpClient.PostAsJsonAsync("/Valuation", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, "/Valuation")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Valuación básica completada con éxito");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /Valuation retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de valuación básica desde ValuationTestData (dataTest=true)");
-                    return ValuationTestData.GetBasicValuation();
-                }
 
                 throw new HttpRequestException(
                     $"Error al realizar la valuación básica. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /Valuation, usando datos de prueba (dataTest=true)");
-                    return ValuationTestData.GetBasicValuation();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Valuation");
                 throw;
             }
             catch (Exception ex)
@@ -71,38 +65,32 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Enviando valuación con daños al servicio externo /Valuation/with-damage");
 
-                using var response = await _httpClient.PostAsJsonAsync("/Valuation/with-damage", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, "/Valuation/with-damage")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Valuación con daños completada con éxito");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /Valuation/with-damage retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de valuación con daños desde ValuationTestData (dataTest=true)");
-                    return ValuationTestData.GetValuationWithDamage();
-                }
 
                 throw new HttpRequestException(
                     $"Error al realizar la valuación con daños. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /Valuation/with-damage, usando datos de prueba (dataTest=true)");
-                    return ValuationTestData.GetValuationWithDamage();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Valuation/with-damage");
                 throw;
             }
             catch (Exception ex)

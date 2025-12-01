@@ -1,5 +1,5 @@
+using System.Net.Http.Headers;
 using System.Text.Json;
-using UyanycarusaService.ModelsTests;
 
 namespace UyanycarusaService.Services
 {
@@ -10,16 +10,17 @@ namespace UyanycarusaService.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ContentService> _logger;
-        private readonly bool _useTestData;
+        private readonly ITokenService _tokenService;
 
         public ContentService(
             IHttpClientFactory httpClientFactory,
             ILogger<ContentService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ITokenService tokenService)
         {
             _httpClient = httpClientFactory.CreateClient("WebuyAnyCarApi");
             _logger = logger;
-            _useTestData = configuration.GetValue<bool>("dataTest");
+            _tokenService = tokenService;
         }
 
         /// <inheritdoc />
@@ -27,38 +28,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando lista de FAQs desde el servicio externo /content/faqs");
 
-                var response = await _httpClient.GetAsync("/content/faqs");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, "/content/faqs");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Lista de FAQs obtenida exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /content/faqs retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de FAQs desde ContentTestData (dataTest=true)");
-                    return ContentTestData.GetFaqs();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener lista de FAQs. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /content/faqs, usando datos de prueba (dataTest=true)");
-                    return ContentTestData.GetFaqs();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /content/faqs");
                 throw;
             }
             catch (Exception ex)
@@ -73,38 +65,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando FAQs por slug {Slug} desde el servicio externo", slug);
 
-                var response = await _httpClient.GetAsync($"/content/faqs/{Uri.EscapeDataString(slug)}");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/content/faqs/{Uri.EscapeDataString(slug)}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("FAQs por slug obtenidas exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /content/faqs/{Slug} retornó un código de estado: {StatusCode}", slug, response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de FAQs por slug desde ContentTestData (dataTest=true)");
-                    return ContentTestData.GetFaqsBySlug();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener FAQs por slug. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /content/faqs, usando datos de prueba (dataTest=true)");
-                    return ContentTestData.GetFaqsBySlug();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /content/faqs");
                 throw;
             }
             catch (Exception ex)
@@ -119,38 +102,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando lista de páginas de landing desde el servicio externo /content/landing-page");
 
-                var response = await _httpClient.GetAsync("/content/landing-page");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, "/content/landing-page");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Lista de páginas de landing obtenida exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /content/landing-page retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de landing pages desde ContentTestData (dataTest=true)");
-                    return ContentTestData.GetLandingPages();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener lista de páginas de landing. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /content/landing-page, usando datos de prueba (dataTest=true)");
-                    return ContentTestData.GetLandingPages();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /content/landing-page");
                 throw;
             }
             catch (Exception ex)
@@ -165,38 +139,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando página de landing por slug {Slug} desde el servicio externo", slug);
 
-                var response = await _httpClient.GetAsync($"/content/landing-page/{Uri.EscapeDataString(slug)}");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/content/landing-page/{Uri.EscapeDataString(slug)}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Página de landing por slug obtenida exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /content/landing-page/{Slug} retornó un código de estado: {StatusCode}", slug, response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de landing page por slug desde ContentTestData (dataTest=true)");
-                    return ContentTestData.GetLandingPageBySlug();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener página de landing por slug. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /content/landing-page, usando datos de prueba (dataTest=true)");
-                    return ContentTestData.GetLandingPageBySlug();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /content/landing-page");
                 throw;
             }
             catch (Exception ex)

@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Text.Json;
 using UyanycarusaService.Services;
+using System.IO;
 
 namespace UyanycarusaService.Controllers
 {
@@ -134,6 +137,91 @@ namespace UyanycarusaService.Controllers
                 });
             }
         }
+
+        /// <summary>
+        /// Obtiene la lista de trims (versiones/equipamientos) disponibles para un año, marca y modelo específicos desde el servicio externo
+        /// </summary>
+        /// <param name="year">Año del vehículo</param>
+        /// <param name="make">Marca del vehículo</param>
+        /// <param name="model">Modelo del vehículo</param>
+        /// <returns>Lista de trims disponibles (array de objetos con bodystyle, series, imageUrl)</returns>
+        /// <response code="200">Retorna la lista de trims exitosamente</response>
+        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
+        /// <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
+        /// <response code="500">Error al consumir el servicio externo</response>
+        [HttpGet("trims/{year}/{make}/{model}")]
+        [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<JsonElement>> GetTrims(int year, string make, string model)
+        {
+            try
+            {
+                var trims = await _vehiclesService.GetTrimsAsync(year, make, model);
+                return Ok(trims);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(500, new {
+                    message = "Error al comunicarse con el servicio externo",
+                    detail = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new {
+                    message = "Error inesperado al procesar la solicitud",
+                    detail = ex.Message
+                });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una imagen desde una URL externa
+        /// </summary>
+        /// <param name="url">URL de la imagen a obtener</param>
+        /// <returns>Archivo de imagen</returns>
+        /// <response code="200">Retorna la imagen exitosamente</response>
+        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
+        /// <response code="500">Error al obtener la imagen desde la URL</response>
+        [HttpGet("image")]
+        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GetImage([FromQuery] string url)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(url))
+                {
+                    return BadRequest(new { message = "La URL es requerida" });
+                }
+
+                var (imageContent, contentType) = await _vehiclesService.GetImageAsync(url);
+
+                var stream = new MemoryStream(imageContent);
+                return new FileStreamResult(stream, contentType)
+                {
+                    EnableRangeProcessing = true
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(500, new {
+                    message = "Error al comunicarse con el servicio externo para obtener la imagen",
+                    detail = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new {
+                    message = "Error inesperado al procesar la solicitud",
+                    detail = ex.Message
+                });
+            }
+        }
+
     }
 }
 

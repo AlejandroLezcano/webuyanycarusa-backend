@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using System.Text.Json;
-using UyanycarusaService.ModelsTests;
 
 namespace UyanycarusaService.Services
 {
@@ -11,16 +11,17 @@ namespace UyanycarusaService.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<AttributionService> _logger;
-        private readonly bool _useTestData;
+        private readonly ITokenService _tokenService;
 
         public AttributionService(
             IHttpClientFactory httpClientFactory,
             ILogger<AttributionService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ITokenService tokenService)
         {
             _httpClient = httpClientFactory.CreateClient("WebuyAnyCarApi");
             _logger = logger;
-            _useTestData = configuration.GetValue<bool>("dataTest");
+            _tokenService = tokenService;
         }
 
         /// <inheritdoc />
@@ -28,7 +29,6 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Creando u obteniendo visitor desde el servicio externo /Attribution/visitor");
 
                 var url = "/Attribution/visitor";
                 if (oldVisitorId.HasValue)
@@ -36,36 +36,28 @@ namespace UyanycarusaService.Services
                     url += $"?oldVisitorId={oldVisitorId.Value}";
                 }
 
-                var response = await _httpClient.PostAsync(url, null);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Visitor creado u obtenido exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /Attribution/visitor retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de visitor desde AttributionTestData (dataTest=true)");
-                    return AttributionTestData.GetVisitor();
-                }
 
                 throw new HttpRequestException(
                     $"Error al crear u obtener visitor. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /Attribution/visitor, usando datos de prueba (dataTest=true)");
-                    return AttributionTestData.GetVisitor();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Attribution/visitor");
                 throw;
             }
             catch (Exception ex)
@@ -80,38 +72,32 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Registrando visita para visitor {VisitorId} en el servicio externo", visitorId);
 
-                using var response = await _httpClient.PostAsJsonAsync($"/Attribution/visitor/{visitorId}/visit", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/Attribution/visitor/{visitorId}/visit")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Visita registrada exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /Attribution/visitor/visit retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de visita desde AttributionTestData (dataTest=true)");
-                    return AttributionTestData.GetVisit();
-                }
 
                 throw new HttpRequestException(
                     $"Error al registrar visita. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /Attribution/visitor/visit, usando datos de prueba (dataTest=true)");
-                    return AttributionTestData.GetVisit();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Attribution/visitor/visit");
                 throw;
             }
             catch (Exception ex)
