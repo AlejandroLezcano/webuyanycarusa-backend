@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using System.Text.Json;
-using UyanycarusaService.ModelsTests;
 
 namespace UyanycarusaService.Services
 {
@@ -11,16 +11,17 @@ namespace UyanycarusaService.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<CustomerJourneyService> _logger;
-        private readonly bool _useTestData;
+        private readonly ITokenService _tokenService;
 
         public CustomerJourneyService(
             IHttpClientFactory httpClientFactory,
             ILogger<CustomerJourneyService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ITokenService tokenService)
         {
             _httpClient = httpClientFactory.CreateClient("WebuyAnyCarApi");
             _logger = logger;
-            _useTestData = configuration.GetValue<bool>("dataTest");
+            _tokenService = tokenService;
         }
 
         /// <inheritdoc />
@@ -28,38 +29,30 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Creando customer journey con YMM en el servicio externo /customer-journey");
 
-                using var response = await _httpClient.PostAsJsonAsync("/customer-journey", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, "/customer-journey")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
-
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Customer journey con YMM creado exitosamente");
                     return json;
                 }
 
-                _logger.LogWarning("El servicio externo /customer-journey retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de journey YMM desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyWithYMM();
-                }
 
                 throw new HttpRequestException(
                     $"Error al crear customer journey con YMM. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /customer-journey, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyWithYMM();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /customer-journey");
                 throw;
             }
             catch (Exception ex)
@@ -74,38 +67,32 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Creando customer journey con VIN en el servicio externo /customer-journey/vin");
 
-                using var response = await _httpClient.PostAsJsonAsync("/customer-journey/vin", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, "/customer-journey/vin")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Customer journey con VIN creado exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /customer-journey/vin retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de journey VIN desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyWithVIN();
-                }
 
                 throw new HttpRequestException(
                     $"Error al crear customer journey con VIN. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /customer-journey/vin, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyWithVIN();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /customer-journey/vin");
                 throw;
             }
             catch (Exception ex)
@@ -120,38 +107,32 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Creando customer journey con Plate en el servicio externo /customer-journey/plate");
 
-                using var response = await _httpClient.PostAsJsonAsync("/customer-journey/plate", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, "/customer-journey/plate")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Customer journey con Plate creado exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /customer-journey/plate retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de journey Plate desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyWithPlate();
-                }
 
                 throw new HttpRequestException(
                     $"Error al crear customer journey con Plate. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /customer-journey/plate, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyWithPlate();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /customer-journey/plate");
                 throw;
             }
             catch (Exception ex)
@@ -166,38 +147,28 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Obteniendo customer journey por ID {Id} desde el servicio externo", id);
 
-                var response = await _httpClient.GetAsync($"/customer-journey/{id}");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/customer-journey/{id}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Customer journey obtenido exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /customer-journey/{Id} retornó un código de estado: {StatusCode}", id, response.StatusCode);
 
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de journey desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyById();
-                }
-
-                throw new HttpRequestException(
-                    $"Error al obtener customer journey. StatusCode: {response.StatusCode}, Detail: {content}");
+                throw new HttpRequestException($"Error al obtener customer journey. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /customer-journey, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyById();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /customer-journey");
                 throw;
             }
             catch (Exception ex)
@@ -212,38 +183,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Obteniendo customer journey por visitId {VisitId} desde el servicio externo", visitId);
 
-                var response = await _httpClient.GetAsync($"/customer-journey/{visitId}");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/customer-journey/{visitId}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Customer journey obtenido exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /customer-journey/{VisitId} retornó un código de estado: {StatusCode}", visitId, response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de journey desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyByVisitId();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener customer journey. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /customer-journey, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetJourneyByVisitId();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /customer-journey");
                 throw;
             }
             catch (Exception ex)
@@ -258,38 +220,32 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Actualizando detalles del vehículo para journey {Id} en el servicio externo", id);
 
-                using var response = await _httpClient.PostAsJsonAsync($"/customer-journey/{id}/vehicle-details", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/customer-journey/{id}/vehicle-details")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Detalles del vehículo actualizados exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /customer-journey/vehicle-details retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetUpdatedJourney();
-                }
 
                 throw new HttpRequestException(
                     $"Error al actualizar detalles del vehículo. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetUpdatedJourney();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo");
                 throw;
             }
             catch (Exception ex)
@@ -304,38 +260,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Obteniendo opciones de daño para journey {CustomerJourneyId} desde el servicio externo", customerJourneyId);
 
-                var response = await _httpClient.GetAsync($"/customer-journey/{customerJourneyId}/damage/options");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/customer-journey/{customerJourneyId}/damage/options");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Opciones de daño obtenidas exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /customer-journey/damage/options retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de opciones de daño desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetDamageOptions();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener opciones de daño. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetDamageOptions();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo");
                 throw;
             }
             catch (Exception ex)
@@ -350,25 +297,22 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Actualizando condición del vehículo para journey {Id} en el servicio externo", id);
 
-                using var response = await _httpClient.PostAsJsonAsync($"/customer-journey/{id}/vehicle-condition", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/customer-journey/{id}/vehicle-condition")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Condición del vehículo actualizada exitosamente");
                     return json;
-                }
-
-                _logger.LogWarning("El servicio externo /customer-journey/vehicle-condition retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetUpdatedJourney();
                 }
 
                 throw new HttpRequestException(
@@ -376,12 +320,7 @@ namespace UyanycarusaService.Services
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetUpdatedJourney();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo");
                 throw;
             }
             catch (Exception ex)
@@ -396,25 +335,22 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Actualizando trabajo de carrocería para journey {Id} en el servicio externo", id);
 
-                using var response = await _httpClient.PostAsJsonAsync($"/customer-journey/{id}/body-work", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/customer-journey/{id}/body-work")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Trabajo de carrocería actualizado exitosamente");
                     return json;
-                }
-
-                _logger.LogWarning("El servicio externo /customer-journey/body-work retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba desde CustomerJourneyTestData (dataTest=true)");
-                    return CustomerJourneyTestData.GetUpdatedJourney();
                 }
 
                 throw new HttpRequestException(
@@ -422,12 +358,7 @@ namespace UyanycarusaService.Services
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo, usando datos de prueba (dataTest=true)");
-                    return CustomerJourneyTestData.GetUpdatedJourney();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo");
                 throw;
             }
             catch (Exception ex)

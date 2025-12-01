@@ -1,5 +1,5 @@
+using System.Net.Http.Headers;
 using System.Text.Json;
-using UyanycarusaService.ModelsTests;
 
 namespace UyanycarusaService.Services
 {
@@ -10,16 +10,17 @@ namespace UyanycarusaService.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<MakeModelContentService> _logger;
-        private readonly bool _useTestData;
+        private readonly ITokenService _tokenService;
 
         public MakeModelContentService(
             IHttpClientFactory httpClientFactory,
             ILogger<MakeModelContentService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ITokenService tokenService)
         {
             _httpClient = httpClientFactory.CreateClient("WebuyAnyCarApi");
             _logger = logger;
-            _useTestData = configuration.GetValue<bool>("dataTest");
+            _tokenService = tokenService;
         }
 
         /// <inheritdoc />
@@ -27,38 +28,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando contenido de marca {Make} desde el servicio externo", make);
 
-                var response = await _httpClient.GetAsync($"/content/make-model/{Uri.EscapeDataString(make)}");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/content/make-model/{Uri.EscapeDataString(make)}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Contenido de marca obtenido exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /content/make-model/{Make} retornó un código de estado: {StatusCode}", make, response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de contenido de marca desde MakeModelContentTestData (dataTest=true)");
-                    return MakeModelContentTestData.GetMakeContent();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener contenido de marca. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /content/make-model, usando datos de prueba (dataTest=true)");
-                    return MakeModelContentTestData.GetMakeContent();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /content/make-model");
                 throw;
             }
             catch (Exception ex)
@@ -73,38 +65,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando contenido de marca {Make} y modelo {Model} desde el servicio externo", make, model);
 
-                var response = await _httpClient.GetAsync($"/content/make-model/{Uri.EscapeDataString(make)}/{Uri.EscapeDataString(model)}");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/content/make-model/{Uri.EscapeDataString(make)}/{Uri.EscapeDataString(model)}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Contenido de marca y modelo obtenido exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /content/make-model/{Make}/{Model} retornó un código de estado: {StatusCode}", make, model, response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de contenido de marca y modelo desde MakeModelContentTestData (dataTest=true)");
-                    return MakeModelContentTestData.GetMakeModelContent();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener contenido de marca y modelo. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /content/make-model, usando datos de prueba (dataTest=true)");
-                    return MakeModelContentTestData.GetMakeModelContent();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /content/make-model");
                 throw;
             }
             catch (Exception ex)

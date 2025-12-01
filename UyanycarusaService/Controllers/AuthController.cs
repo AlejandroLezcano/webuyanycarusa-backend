@@ -89,8 +89,6 @@ namespace UyanycarusaService.Controllers
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            _logger.LogInformation("Token generado para usuario: {Username}", request.Username);
-
             return Ok(new LoginResponse
             {
                 Token = tokenString,

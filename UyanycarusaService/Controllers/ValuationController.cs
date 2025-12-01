@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using UyanycarusaService.Services;
+using UyanycarusaService.Dtos;
 
 namespace UyanycarusaService.Controllers
 {
@@ -37,11 +38,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateValuation([FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> CreateValuation([FromBody] ValuationModel model)
         {
             try
             {
-                var result = await _valuationService.CreateValuationAsync(model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _valuationService.CreateValuationAsync(jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
@@ -78,11 +80,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateValuationWithDamage([FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> CreateValuationWithDamage([FromBody] ValuationWithDamageModel model)
         {
             try
             {
-                var result = await _valuationService.CreateValuationWithDamageAsync(model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _valuationService.CreateValuationWithDamageAsync(jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)

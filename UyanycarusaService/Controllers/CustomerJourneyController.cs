@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using UyanycarusaService.Services;
+using UyanycarusaService.Dtos;
 
 namespace UyanycarusaService.Controllers
 {
@@ -116,11 +117,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateJourneyWithYMM([FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> CreateJourneyWithYMM([FromBody] CustomerJourneyStep1YMMModel model)
         {
             try
             {
-                var result = await _customerJourneyService.CreateJourneyWithYMMAsync(model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _customerJourneyService.CreateJourneyWithYMMAsync(jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
@@ -157,11 +159,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateJourneyWithVIN([FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> CreateJourneyWithVIN([FromBody] CustomerJourneyStep1VINModel model)
         {
             try
             {
-                var result = await _customerJourneyService.CreateJourneyWithVINAsync(model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _customerJourneyService.CreateJourneyWithVINAsync(jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
@@ -198,11 +201,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateJourneyWithPlate([FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> CreateJourneyWithPlate([FromBody] CustomerJourneyStep1PlateModel model)
         {
             try
             {
-                var result = await _customerJourneyService.CreateJourneyWithPlateAsync(model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _customerJourneyService.CreateJourneyWithPlateAsync(jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
@@ -244,11 +248,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> UpdateVehicleDetails(string id, [FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> UpdateVehicleDetails(string id, [FromBody] CustomerJourneyStep2Model model)
         {
             try
             {
-                var result = await _customerJourneyService.UpdateVehicleDetailsAsync(id, model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _customerJourneyService.UpdateVehicleDetailsAsync(id, jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
@@ -328,11 +333,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> UpdateVehicleCondition(string id, [FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> UpdateVehicleCondition(string id, [FromBody] CustomerJourneyStep3Model model)
         {
             try
             {
-                var result = await _customerJourneyService.UpdateVehicleConditionAsync(id, model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _customerJourneyService.UpdateVehicleConditionAsync(id, jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
@@ -372,11 +378,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> UpdateBodyWork(string id, [FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> UpdateBodyWork(string id, [FromBody] CustomerJourneyStep4Model model)
         {
             try
             {
-                var result = await _customerJourneyService.UpdateBodyWorkAsync(id, model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _customerJourneyService.UpdateBodyWorkAsync(id, jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using UyanycarusaService.Services;
+using UyanycarusaService.Dtos;
 
 namespace UyanycarusaService.Controllers
 {
@@ -15,11 +16,16 @@ namespace UyanycarusaService.Controllers
     public class AppointmentController : ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
+        private readonly ISchedulingService _schedulingService;
         private readonly ILogger<AppointmentController> _logger;
 
-        public AppointmentController(IAppointmentService appointmentService, ILogger<AppointmentController> logger)
+        public AppointmentController(
+            IAppointmentService appointmentService,
+            ISchedulingService schedulingService,
+            ILogger<AppointmentController> logger)
         {
             _appointmentService = appointmentService;
+            _schedulingService = schedulingService;
             _logger = logger;
         }
 
@@ -77,16 +83,69 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> BookAppointment([FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> BookAppointment([FromBody] AppointmentBookingModel model)
         {
             try
             {
-                var result = await _appointmentService.BookAppointmentAsync(model);
+                // Paso 1: Solicitar código OTP primero
+                var otpRequest = new ScheduleOTPRequest
+                {
+                    CustomerVehicleId = model.CustomerVehicleId,
+                    BranchId = model.BranchId,
+                    TargetPhoneNumber = model.CustomerPhoneNumber
+                };
+
+                var otpOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                };
+                var otpRequestJson = JsonSerializer.SerializeToElement(otpRequest, otpOptions);
+                _logger.LogWarning("se va a consumir el servicio externo /scheduling/otp/request con el siguiente body: {Body}", otpRequestJson);
+                var otpResponse = await _schedulingService.RequestOTPAsync(otpRequestJson);
+
+                // Paso 2: Si el OTP fue exitoso, continuar con la reserva de la cita
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                };
+                // Formatear la fecha como YYYY-MM-DD (solo fecha, sin hora)
+                var modelCopy = new
+                {
+                    customerVehicleId = model.CustomerVehicleId,
+                    branchId = model.BranchId,
+                    date = model.Date.ToString("yyyy-MM-dd"),
+                    timeSlotId = model.TimeSlotId,
+                    customerPhoneNumber = model.CustomerPhoneNumber,
+                    customerFirstName = model.CustomerFirstName,
+                    customerLastName = model.CustomerLastName,
+                    email = model.Email,
+                    address1 = model.Address1,
+                    address2 = model.Address2,
+                    city = model.City,
+                    visitId = model.VisitId,
+                    smsOptIn = model.smsOptIn,
+                    otpCode = model.OtpCode
+                };
+                var jsonElement = JsonSerializer.SerializeToElement(modelCopy, options);
+                var result = await _appointmentService.BookAppointmentAsync(jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /Appointment/book");
+                _logger.LogWarning(ex, "Error de comunicación con el servicio externo durante el proceso de reserva de cita");
+
+                // Verificar si el error es del OTP o del booking
+                if (ex.Message.Contains("OTP") || ex.Message.Contains("otp"))
+                {
+                    return StatusCode(500, new
+                    {
+                        message = "Error al solicitar código OTP. No se pudo continuar con la reserva de la cita",
+                        detail = ex.Message
+                    });
+                }
+
                 return StatusCode(500, new
                 {
                     message = "Error al comunicarse con el servicio externo de reserva de citas",
@@ -95,7 +154,7 @@ namespace UyanycarusaService.Controllers
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al reservar la cita");
+                _logger.LogError(ex, "Error inesperado al reservar la cita");
                 return StatusCode(500, new
                 {
                     message = "Error inesperado al procesar la solicitud de reserva",
@@ -119,11 +178,35 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> RescheduleAppointment(int existingAppointmentId, [FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> RescheduleAppointment(int existingAppointmentId, [FromBody] AppointmentBookingModel model)
         {
             try
             {
-                var result = await _appointmentService.RescheduleAppointmentAsync(existingAppointmentId, model);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                };
+                // Formatear la fecha como YYYY-MM-DD (solo fecha, sin hora)
+                var modelCopy = new
+                {
+                    customerVehicleId = model.CustomerVehicleId,
+                    branchId = model.BranchId,
+                    date = model.Date.ToString("yyyy-MM-dd"),
+                    timeSlotId = model.TimeSlotId,
+                    customerPhoneNumber = model.CustomerPhoneNumber,
+                    customerFirstName = model.CustomerFirstName,
+                    customerLastName = model.CustomerLastName,
+                    email = model.Email,
+                    address1 = model.Address1,
+                    address2 = model.Address2,
+                    city = model.City,
+                    visitId = model.VisitId,
+                    smsOptIn = model.smsOptIn,
+                    otpCode = model.OtpCode
+                };
+                var jsonElement = JsonSerializer.SerializeToElement(modelCopy, options);
+                var result = await _appointmentService.RescheduleAppointmentAsync(existingAppointmentId, jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)

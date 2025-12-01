@@ -115,6 +115,24 @@ builder.Services.AddSwaggerGen(options =>
 // Health checks
 builder.Services.AddHealthChecks();
 
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost", policy =>
+    {
+        // Lista completa de orígenes comunes de localhost para desarrollo
+        var localhostOrigins = new[]
+        {
+            "http://localhost:3000", "https://localhost:3000",
+        };
+
+        policy.WithOrigins(localhostOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+
 // Services
 builder.Services.AddScoped<IVehiclesService, VehiclesService>();
 builder.Services.AddScoped<IValuationService, ValuationService>();
@@ -125,6 +143,8 @@ builder.Services.AddScoped<IBranchContentService, BranchContentService>();
 builder.Services.AddScoped<IMakeModelContentService, MakeModelContentService>();
 builder.Services.AddScoped<IAttributionService, AttributionService>();
 builder.Services.AddScoped<ISchedulingService, SchedulingService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // HttpClient configuration for external APIs
 var webuyAnyCarBaseUrl = builder.Configuration["ExternalApis:WebuyAnyCarBaseUrl"]
@@ -162,6 +182,9 @@ else
         await next();
     });
 }
+
+// CORS Middleware (must be before other middlewares)
+app.UseCors("AllowLocalhost");
 
 // Rate Limiting Middleware (must be before other middlewares)
 app.UseIpRateLimiting();

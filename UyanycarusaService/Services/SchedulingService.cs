@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using System.Text.Json;
-using UyanycarusaService.ModelsTests;
 
 namespace UyanycarusaService.Services
 {
@@ -11,16 +11,17 @@ namespace UyanycarusaService.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<SchedulingService> _logger;
-        private readonly bool _useTestData;
+        private readonly ITokenService _tokenService;
 
         public SchedulingService(
             IHttpClientFactory httpClientFactory,
             ILogger<SchedulingService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ITokenService tokenService)
         {
             _httpClient = httpClientFactory.CreateClient("WebuyAnyCarApi");
             _logger = logger;
-            _useTestData = configuration.GetValue<bool>("dataTest");
+            _tokenService = tokenService;
         }
 
         /// <inheritdoc />
@@ -28,38 +29,33 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando código OTP en el servicio externo /scheduling/otp/request");
+                // _logger.LogInformation("Solicitando código OTP en el servicio externo /scheduling/otp/request");
+                _logger.LogWarning("se va a consumir el servicio externo /scheduling/otp/request con el siguiente body: {Body}", model);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, "/scheduling/otp/request")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                using var response = await _httpClient.PostAsJsonAsync("/scheduling/otp/request", model);
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
-
+                _logger.LogWarning(content, "se obtuvo el siguiente contenido del servicio externo /scheduling/otp/request: {Content}", content);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Código OTP solicitado exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /scheduling/otp/request retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de OTP desde SchedulingTestData (dataTest=true)");
-                    return SchedulingTestData.GetRequestOTP();
-                }
 
                 throw new HttpRequestException(
                     $"Error al solicitar código OTP. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /scheduling/otp/request, usando datos de prueba (dataTest=true)");
-                    return SchedulingTestData.GetRequestOTP();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /scheduling/otp/request");
                 throw;
             }
             catch (Exception ex)

@@ -1,5 +1,5 @@
+using System.Net.Http.Headers;
 using System.Text.Json;
-using UyanycarusaService.ModelsTests;
 
 namespace UyanycarusaService.Services
 {
@@ -10,16 +10,17 @@ namespace UyanycarusaService.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<BranchContentService> _logger;
-        private readonly bool _useTestData;
+        private readonly ITokenService _tokenService;
 
         public BranchContentService(
             IHttpClientFactory httpClientFactory,
             ILogger<BranchContentService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ITokenService tokenService)
         {
             _httpClient = httpClientFactory.CreateClient("WebuyAnyCarApi");
             _logger = logger;
-            _useTestData = configuration.GetValue<bool>("dataTest");
+            _tokenService = tokenService;
         }
 
         /// <inheritdoc />
@@ -27,7 +28,6 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando lista de sucursales desde el servicio externo /content/branches");
 
                 var queryParams = new List<string>();
                 if (!string.IsNullOrEmpty(zipCode))
@@ -46,36 +46,28 @@ namespace UyanycarusaService.Services
                 var queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
                 var url = $"/content/branches{queryString}";
 
-                var response = await _httpClient.GetAsync(url);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Lista de sucursales obtenida exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /content/branches retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de sucursales desde BranchContentTestData (dataTest=true)");
-                    return BranchContentTestData.GetBranches();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener lista de sucursales. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /content/branches, usando datos de prueba (dataTest=true)");
-                    return BranchContentTestData.GetBranches();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /content/branches");
                 throw;
             }
             catch (Exception ex)
@@ -90,38 +82,29 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando detalle de sucursal {BranchId} desde el servicio externo", branchId);
 
-                var response = await _httpClient.GetAsync($"/content/branches/{branchId}");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/content/branches/{branchId}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Detalle de sucursal obtenido exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /content/branches/{BranchId} retornó un código de estado: {StatusCode}", branchId, response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de detalle de sucursal desde BranchContentTestData (dataTest=true)");
-                    return BranchContentTestData.GetBranchDetail();
-                }
 
                 throw new HttpRequestException(
                     $"Error al obtener detalle de sucursal. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /content/branches, usando datos de prueba (dataTest=true)");
-                    return BranchContentTestData.GetBranchDetail();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /content/branches");
                 throw;
             }
             catch (Exception ex)

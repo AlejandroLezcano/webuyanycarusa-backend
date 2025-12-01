@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using System.Text.Json;
-using UyanycarusaService.ModelsTests;
 
 namespace UyanycarusaService.Services
 {
@@ -11,16 +11,17 @@ namespace UyanycarusaService.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<AppointmentService> _logger;
-        private readonly bool _useTestData;
+        private readonly ITokenService _tokenService;
 
         public AppointmentService(
             IHttpClientFactory httpClientFactory,
             ILogger<AppointmentService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ITokenService tokenService)
         {
             _httpClient = httpClientFactory.CreateClient("WebuyAnyCarApi");
             _logger = logger;
-            _useTestData = configuration.GetValue<bool>("dataTest");
+            _tokenService = tokenService;
         }
 
         /// <inheritdoc />
@@ -28,25 +29,20 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Solicitando disponibilidad de citas para zipCode {ZipCode} y customerVehicleId {CustomerVehicleId}", zipCode, customerVehicleId);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/Appointment/availability/{zipCode}/{customerVehicleId}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                var response = await _httpClient.GetAsync($"/Appointment/availability/{zipCode}/{customerVehicleId}");
+                var response = await _httpClient.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Disponibilidad de citas obtenida exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /Appointment/availability retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de disponibilidad desde AppointmentTestData (dataTest=true)");
-                    return AppointmentTestData.GetAvailability();
-                }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException(
@@ -54,12 +50,7 @@ namespace UyanycarusaService.Services
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /Appointment/availability, usando datos de prueba (dataTest=true)");
-                    return AppointmentTestData.GetAvailability();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Appointment/availability");
                 throw;
             }
             catch (Exception ex)
@@ -74,38 +65,31 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Reservando cita en el servicio externo /Appointment/book");
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, "/Appointment/book")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                using var response = await _httpClient.PostAsJsonAsync("/Appointment/book", model);
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Cita reservada exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /Appointment/book retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de reserva desde AppointmentTestData (dataTest=true)");
-                    return AppointmentTestData.GetBookedAppointment();
-                }
 
                 throw new HttpRequestException(
                     $"Error al reservar la cita. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /Appointment/book, usando datos de prueba (dataTest=true)");
-                    return AppointmentTestData.GetBookedAppointment();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Appointment/book");
                 throw;
             }
             catch (Exception ex)
@@ -120,38 +104,31 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Reprogramando cita {AppointmentId} en el servicio externo /Appointment/reschedule", existingAppointmentId);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/Appointment/{existingAppointmentId}/reschedule")
+                {
+                    Content = JsonContent.Create(model)
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                using var response = await _httpClient.PostAsJsonAsync($"/Appointment/{existingAppointmentId}/reschedule", model);
+                using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Cita reprogramada exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /Appointment/reschedule retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de reprogramación desde AppointmentTestData (dataTest=true)");
-                    return AppointmentTestData.GetRescheduledAppointment();
-                }
 
                 throw new HttpRequestException(
                     $"Error al reprogramar la cita. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /Appointment/reschedule, usando datos de prueba (dataTest=true)");
-                    return AppointmentTestData.GetRescheduledAppointment();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Appointment/reschedule");
                 throw;
             }
             catch (Exception ex)
@@ -166,38 +143,28 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                _logger.LogInformation("Cancelando cita para customerVehicleId {CustomerVehicleId} y phoneNumber {PhoneNumber}", customerVehicleId, phoneNumber);
+                var accessToken = await _tokenService.GetAccessTokenAsync();
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/Appointment/cancel/{customerVehicleId}/{phoneNumber}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                var response = await _httpClient.PostAsync($"/Appointment/cancel/{customerVehicleId}/{phoneNumber}", null);
+                var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogInformation("Cita cancelada exitosamente");
                     return json;
                 }
 
                 _logger.LogWarning("El servicio externo /Appointment/cancel retornó un código de estado: {StatusCode}", response.StatusCode);
-
-                if (_useTestData)
-                {
-                    _logger.LogInformation("Usando datos de prueba de cancelación desde AppointmentTestData (dataTest=true)");
-                    return AppointmentTestData.GetCancelledAppointment();
-                }
 
                 throw new HttpRequestException(
                     $"Error al cancelar la cita. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                if (_useTestData)
-                {
-                    _logger.LogWarning(ex, "No se pudo comunicar con el servicio externo /Appointment/cancel, usando datos de prueba (dataTest=true)");
-                    return AppointmentTestData.GetCancelledAppointment();
-                }
-
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Appointment/cancel");
                 throw;
             }
             catch (Exception ex)

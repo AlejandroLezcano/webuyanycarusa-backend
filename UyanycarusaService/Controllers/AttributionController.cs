@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using UyanycarusaService.Services;
+using UyanycarusaService.Dtos;
 
 namespace UyanycarusaService.Controllers
 {
@@ -90,11 +91,12 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateVisit(long visitorId, [FromBody] JsonElement model)
+        public async Task<ActionResult<JsonElement>> CreateVisit(long visitorId, [FromBody] VisitRequestModel model)
         {
             try
             {
-                var result = await _attributionService.CreateVisitAsync(visitorId, model);
+                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var result = await _attributionService.CreateVisitAsync(visitorId, jsonElement);
                 return StatusCode(201, result);
             }
             catch (HttpRequestException ex)
