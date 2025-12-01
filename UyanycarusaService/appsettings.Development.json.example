@@ -1,9 +1,0 @@
-{
-  "AzureAd": {
-    "TenantId": "dbab3ce2-79b3-41fe-916d-93ba6de5d768",
-    "ClientId": "6da49445-7d18-47e4-8f88-7c690a920d45",
-    "ClientSecret": "YOUR_AZURE_AD_CLIENT_SECRET_HERE",
-    "Scope": "api://878927b8-ec77-42b7-9c03-2ca442db8eec/.default"
-  }
-}
-
