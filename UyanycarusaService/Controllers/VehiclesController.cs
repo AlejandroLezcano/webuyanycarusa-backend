@@ -189,7 +189,7 @@ namespace UyanycarusaService.Controllers
         [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> GetImage([FromQuery] string url)
+       public async Task<IActionResult> GetImage([FromQuery] string url)
         {
             try
             {
@@ -201,6 +201,7 @@ namespace UyanycarusaService.Controllers
                 var (imageContent, contentType) = await _vehiclesService.GetImageAsync(url);
 
                 var stream = new MemoryStream(imageContent);
+
                 return new FileStreamResult(stream, contentType)
                 {
                     EnableRangeProcessing = true
@@ -208,14 +209,16 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return StatusCode(500, new {
+                return StatusCode(500, new
+                {
                     message = "Error al comunicarse con el servicio externo para obtener la imagen",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new {
+                return StatusCode(500, new
+                {
                     message = "Error inesperado al procesar la solicitud",
                     detail = ex.Message
                 });
