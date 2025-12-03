@@ -180,36 +180,24 @@ namespace UyanycarusaService.Services
         /// <returns>Tupla con el contenido de la imagen (bytes) y el tipo de contenido (content type)</returns>
         public async Task<(byte[] content, string contentType)> GetImageAsync(string imageUrl)
         {
-            try
-            {
-                var httpClient = new HttpClient();
-                var responseImage = await httpClient.GetAsync(imageUrl);
+            if (string.IsNullOrWhiteSpace(imageUrl))
+                throw new ArgumentException("imageUrl es requerido", nameof(imageUrl));
 
-                if (responseImage.IsSuccessStatusCode)
-                {
-                    var imageContent = await responseImage.Content.ReadAsByteArrayAsync();
-                    var contentType = responseImage.Content.Headers.ContentType?.MediaType ?? "image/jpeg";
+            var response = await _httpClient.GetAsync(imageUrl);
 
+            if (!response.IsSuccessStatusCode)
+            {
+                // esto lo va a atrapar el controller
+                throw new HttpRequestException(
+                    $"No se pudo obtener la imagen. StatusCode: {(int)response.StatusCode}");
+            }
 
-                    return (imageContent, contentType);
-                }
-                else
-                {
-                    var errorContent = await responseImage.Content.ReadAsStringAsync();
-                    throw new HttpRequestException($"Error al obtener la imagen desde {imageUrl}. StatusCode: {responseImage.StatusCode}, Detail: {errorContent}");
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo para obtener la imagen desde {ImageUrl}", imageUrl);
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener la imagen desde {ImageUrl}", imageUrl);
-                throw;
-            }
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+
+            // intenta tomar el content-type real, si no, usa image/jpeg por defecto
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "image/jpeg";
+
+            return (bytes, contentType);
         }
-    }
 }
 
