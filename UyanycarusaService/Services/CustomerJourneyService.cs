@@ -151,7 +151,7 @@ namespace UyanycarusaService.Services
                 var accessToken = await _tokenService.GetAccessTokenAsync();
                 var request = new HttpRequestMessage(HttpMethod.Get, $"/customer-journey/{id}");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
+                _logger.LogInformation("Request: {Request}", request.ToString());
                 var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();

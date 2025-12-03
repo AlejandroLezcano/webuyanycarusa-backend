@@ -50,7 +50,7 @@ namespace UyanycarusaService.Services
 
                 var formContent = new FormUrlEncodedContent(formData);
                 formContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
+                _logger.LogWarning("FormContent: {FormContent}", formContent.ToString());
                 var response = await _httpClient.PostAsync(tokenUrl, formContent);
 
                 var content = await response.Content.ReadAsStringAsync();

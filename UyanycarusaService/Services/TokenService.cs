@@ -29,7 +29,7 @@ namespace UyanycarusaService.Services
             // Intentar obtener el token del cache
             if (_memoryCache.TryGetValue(CacheKey, out string? cachedToken) && !string.IsNullOrEmpty(cachedToken))
             {
-                _logger.LogDebug("Token obtenido desde cache");
+                _logger.LogDebug("Token obtenido desde cache", cachedToken);
                 return cachedToken;
             }
 
@@ -38,7 +38,6 @@ namespace UyanycarusaService.Services
             try
             {
                 var tokenResponse = await _authService.GetTokenAsync();
-
                 // Extraer el token y el tiempo de expiración
                 var accessToken = tokenResponse.GetProperty("access_token").GetString();
                 var expiresIn = tokenResponse.TryGetProperty("expires_in", out var expiresInProp)
