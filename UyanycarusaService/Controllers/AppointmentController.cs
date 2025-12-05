@@ -87,24 +87,6 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                // Paso 1: Solicitar código OTP primero
-                var otpRequest = new ScheduleOTPRequest
-                {
-                    CustomerVehicleId = model.CustomerVehicleId,
-                    BranchId = model.BranchId,
-                    TargetPhoneNumber = model.CustomerPhoneNumber
-                };
-
-                var otpOptions = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                };
-                var otpRequestJson = JsonSerializer.SerializeToElement(otpRequest, otpOptions);
-                _logger.LogWarning("se va a consumir el servicio externo /scheduling/otp/request con el siguiente body: {Body}", otpRequestJson);
-                var otpResponse = await _schedulingService.RequestOTPAsync(otpRequestJson);
-
-                // Paso 2: Si el OTP fue exitoso, continuar con la reserva de la cita
                 var options = new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -134,18 +116,6 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogWarning(ex, "Error de comunicación con el servicio externo durante el proceso de reserva de cita");
-
-                // Verificar si el error es del OTP o del booking
-                if (ex.Message.Contains("OTP") || ex.Message.Contains("otp"))
-                {
-                    return StatusCode(500, new
-                    {
-                        message = "Error al solicitar código OTP. No se pudo continuar con la reserva de la cita",
-                        detail = ex.Message
-                    });
-                }
-
                 return StatusCode(500, new
                 {
                     message = "Error al comunicarse con el servicio externo de reserva de citas",

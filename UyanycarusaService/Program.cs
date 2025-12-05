@@ -146,6 +146,7 @@ builder.Services.AddScoped<IAttributionService, AttributionService>();
 builder.Services.AddScoped<ISchedulingService, SchedulingService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ISmsService, SmsService>();
 
 // HttpClient configuration for external APIs
 var webuyAnyCarBaseUrl = builder.Configuration["ExternalApis:WebuyAnyCarBaseUrl"]
