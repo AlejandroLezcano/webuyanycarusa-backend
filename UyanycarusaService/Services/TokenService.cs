@@ -11,6 +11,7 @@ namespace UyanycarusaService.Services
         private readonly IAuthService _authService;
         private readonly IMemoryCache _memoryCache;
         private readonly ILogger<TokenService> _logger;
+        private readonly SemaphoreSlim _tokenSemaphore;
         private const string CacheKey = "AzureAd_AccessToken";
 
         public TokenService(
@@ -21,6 +22,7 @@ namespace UyanycarusaService.Services
             _authService = authService;
             _memoryCache = memoryCache;
             _logger = logger;
+            _tokenSemaphore = new SemaphoreSlim(1, 1); // Solo permite una solicitud de token a la vez
         }
 
         /// <inheritdoc />
@@ -29,15 +31,26 @@ namespace UyanycarusaService.Services
             // Intentar obtener el token del cache
             if (_memoryCache.TryGetValue(CacheKey, out string? cachedToken) && !string.IsNullOrEmpty(cachedToken))
             {
-                _logger.LogDebug("Token obtenido desde cache", cachedToken);
+                _logger.LogDebug("Token obtenido desde cache");
                 return cachedToken;
             }
 
             // Si no está en cache o expiró, obtener uno nuevo
-
+            // Usar semáforo para evitar múltiples solicitudes concurrentes
+            await _tokenSemaphore.WaitAsync();
             try
             {
+                // Verificar nuevamente el cache después de adquirir el lock
+                // (otro hilo pudo haber obtenido el token mientras esperábamos)
+                if (_memoryCache.TryGetValue(CacheKey, out string? cachedTokenAfterLock) && !string.IsNullOrEmpty(cachedTokenAfterLock))
+                {
+                    _logger.LogDebug("Token obtenido desde cache después de adquirir lock (otro hilo lo obtuvo)");
+                    return cachedTokenAfterLock;
+                }
+
+                _logger.LogInformation("Obteniendo nuevo token de Azure AD (cache vacío)");
                 var tokenResponse = await _authService.GetTokenAsync();
+
                 // Extraer el token y el tiempo de expiración
                 var accessToken = tokenResponse.GetProperty("access_token").GetString();
                 var expiresIn = tokenResponse.TryGetProperty("expires_in", out var expiresInProp)
@@ -56,6 +69,7 @@ namespace UyanycarusaService.Services
                 };
 
                 _memoryCache.Set(CacheKey, accessToken, cacheOptions);
+                _logger.LogInformation("Token de Azure AD obtenido y almacenado en cache. Expira en {Expiration} segundos", expiresIn - 300);
 
                 return accessToken;
             }
@@ -63,6 +77,10 @@ namespace UyanycarusaService.Services
             {
                 _logger.LogError(ex, "Error al obtener token de Azure AD");
                 throw;
+            }
+            finally
+            {
+                _tokenSemaphore.Release();
             }
         }
     }

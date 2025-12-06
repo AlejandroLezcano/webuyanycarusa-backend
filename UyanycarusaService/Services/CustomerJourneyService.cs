@@ -297,7 +297,7 @@ namespace UyanycarusaService.Services
         {
             try
             {
-
+                _logger.LogWarning("Iniciando UpdateVehicleConditionAsync para journey ID: {JourneyId} a las {Timestamp}", id, DateTime.UtcNow);
                 var accessToken = await _tokenService.GetAccessTokenAsync();
                 var request = new HttpRequestMessage(HttpMethod.Post, $"/customer-journey/{id}/vehicle-condition")
                 {
@@ -305,13 +305,16 @@ namespace UyanycarusaService.Services
                 };
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
+                _logger.LogWarning("Enviando petición HTTP POST a /customer-journey/{JourneyId}/vehicle-condition", id);
                 using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
+                _logger.LogWarning("Respuesta recibida del servicio externo. StatusCode: {StatusCode}, JourneyId: {JourneyId}", response.StatusCode, id);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
+                    _logger.LogWarning("UpdateVehicleConditionAsync completado exitosamente para journey ID: {JourneyId}", id);
                     return json;
                 }
 
@@ -320,12 +323,12 @@ namespace UyanycarusaService.Services
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo");
+                _logger.LogError(ex, "Error al comunicarse con el servicio externo para journey ID: {JourneyId}", id);
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al actualizar condición del vehículo");
+                _logger.LogError(ex, "Error inesperado al actualizar condición del vehículo para journey ID: {JourneyId}", id);
                 throw;
             }
         }

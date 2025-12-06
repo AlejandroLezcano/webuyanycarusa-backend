@@ -337,8 +337,10 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
+                _logger.LogInformation("UpdateVehicleCondition llamado para journey ID: {JourneyId}, RequestId: {RequestId}", id, HttpContext.TraceIdentifier);
                 var jsonElement = JsonSerializer.SerializeToElement(model);
                 var result = await _customerJourneyService.UpdateVehicleConditionAsync(id, jsonElement);
+                _logger.LogInformation("UpdateVehicleCondition completado exitosamente para journey ID: {JourneyId}, RequestId: {RequestId}", id, HttpContext.TraceIdentifier);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
