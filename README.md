@@ -1,89 +1,89 @@
 # WeBuyAnyCar USA - Backend API
 
-API REST desarrollada en .NET 8.0 que actúa como intermediario para consumir y exponer servicios de WeBuyAnyCar USA. Esta API proporciona un punto de acceso centralizado y seguro para consultar información sobre vehículos, realizar valuaciones, gestionar citas y acceder a contenido relacionado con la plataforma.
+REST API developed in .NET 8.0 that acts as an intermediary to consume and expose WeBuyAnyCar USA services. This API provides a centralized and secure access point to query vehicle information, perform valuations, manage appointments, and access platform-related content.
 
-## 📋 Descripción del Proyecto
+## 📋 Project Description
 
-Este proyecto es una API backend que se conecta con la API externa de WeBuyAnyCar USA (`https://staging-api.wbac.dev`) para proporcionar funcionalidades relacionadas con:
+This project is a backend API that connects with the external WeBuyAnyCar USA API (`https://staging-api.wbac.dev`) to provide functionalities related to:
 
-- **Gestión de Vehículos**: Consulta de años, marcas y modelos disponibles
-- **Valuaciones**: Cálculo de valor de vehículos
-- **Citas (Appointments)**: Gestión de citas para evaluación de vehículos
-- **Contenido**: Gestión de contenido de sucursales, marcas y modelos
-- **Customer Journey**: Seguimiento del recorrido del cliente
-- **Scheduling**: Programación de servicios
-- **Attribution**: Atribución de conversiones y referencias
+- **Vehicle Management**: Query available years, makes, and models
+- **Valuations**: Vehicle value calculation
+- **Appointments**: Appointment management for vehicle evaluation
+- **Content**: Branch, make, and model content management
+- **Customer Journey**: Customer journey tracking
+- **Scheduling**: Service scheduling
+- **Attribution**: Conversion and referral attribution
 
-## ✨ Características Principales
+## ✨ Main Features
 
-- 🔐 **Autenticación JWT**: Sistema de autenticación basado en tokens JWT
-- 🛡️ **Rate Limiting**: Control de límites de solicitudes por IP para prevenir abusos
-- 📚 **API Versioning**: Soporte para versionado de API (v1, v2, etc.)
-- 📖 **Swagger/OpenAPI**: Documentación interactiva de la API disponible en modo desarrollo
-- 🏥 **Health Checks**: Endpoint de salud para monitoreo
-- 🔒 **HTTPS Enforcement**: Forzado de conexiones seguras en producción
-- ⚡ **Error Handling**: Middleware centralizado para manejo de errores
-- 🐳 **Docker Support**: Configuración lista para contenedores Docker
+- 🔐 **JWT Authentication**: JWT token-based authentication system
+- 🛡️ **Rate Limiting**: IP-based request limit control to prevent abuse
+- 📚 **API Versioning**: Support for API versioning (v1, v2, etc.)
+- 📖 **Swagger/OpenAPI**: Interactive API documentation available in development mode
+- 🏥 **Health Checks**: Health endpoint for monitoring
+- 🔒 **HTTPS Enforcement**: Forced secure connections in production
+- ⚡ **Error Handling**: Centralized middleware for error handling
+- 🐳 **Docker Support**: Docker container-ready configuration
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Technologies Used
 
-- **.NET 8.0**: Framework principal
-- **ASP.NET Core Web API**: Para construcción de la API REST
-- **JWT Bearer Authentication**: Autenticación basada en tokens
-- **AspNetCoreRateLimit**: Control de límites de solicitudes
-- **Swashbuckle (Swagger)**: Documentación de API
-- **Microsoft.AspNetCore.Mvc.Versioning**: Versionado de API
+- **.NET 8.0**: Main framework
+- **ASP.NET Core Web API**: For REST API construction
+- **JWT Bearer Authentication**: Token-based authentication
+- **AspNetCoreRateLimit**: Request limit control
+- **Swashbuckle (Swagger)**: API documentation
+- **Microsoft.AspNetCore.Mvc.Versioning**: API versioning
 
-## 📦 Requisitos Previos
+## 📦 Prerequisites
 
-Antes de comenzar, asegúrate de tener instalado:
+Before starting, make sure you have installed:
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) o superior
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) (recomendado) o [Visual Studio Code](https://code.visualstudio.com/)
-- [Git](https://git-scm.com/) (opcional, para clonar el repositorio)
-- [Docker](https://www.docker.com/) (opcional, para ejecutar en contenedor)
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or higher
+- [Visual Studio 2022](https://visualstudio.microsoft.com/) (recommended) or [Visual Studio Code](https://code.visualstudio.com/)
+- [Git](https://git-scm.com/) (optional, to clone the repository)
+- [Docker](https://www.docker.com/) (optional, to run in container)
 
-## 🚀 Instalación y Configuración
+## 🚀 Installation and Configuration
 
-### Paso 1: Clonar o Navegar al Proyecto
+### Step 1: Clone or Navigate to the Project
 
-Si tienes el proyecto en un repositorio Git:
+If you have the project in a Git repository:
 ```bash
-git clone <url-del-repositorio>
+git clone <repository-url>
 cd buy-cars/we-buy-any-car-back
 ```
 
-O simplemente navega a la carpeta del proyecto:
+Or simply navigate to the project folder:
 ```bash
 cd we-buy-any-car-back
 ```
 
-### Paso 2: Restaurar Dependencias
+### Step 2: Restore Dependencies
 
-Navega a la carpeta del servicio y restaura los paquetes NuGet:
+Navigate to the service folder and restore NuGet packages:
 
 ```bash
 cd UyanycarusaService
 dotnet restore
 ```
 
-Este comando descargará todas las dependencias necesarias definidas en el archivo `UyanycarusaService.csproj`.
+This command will download all necessary dependencies defined in the `UyanycarusaService.csproj` file.
 
-### Paso 3: Configurar appsettings.json
+### Step 3: Configure appsettings.json
 
-El archivo `appsettings.json` ya contiene una configuración básica, pero puedes ajustarla según tus necesidades:
+The `appsettings.json` file already contains a basic configuration, but you can adjust it according to your needs:
 
-**Configuración de JWT:**
+**JWT Configuration:**
 ```json
 "JwtSettings": {
-  "SecretKey": "SuperSecretKeyCompuGlobalHyperMegaNet",  // ⚠️ Cambiar en producción
+  "SecretKey": "SuperSecretKeyCompuGlobalHyperMegaNet",  // ⚠️ Change in production
   "Issuer": "UyanycarusaService",
   "Audience": "UyanycarusaServiceUsers",
   "ExpirationInMinutes": 60
 }
 ```
 
-**Configuración de Rate Limiting:**
+**Rate Limiting Configuration:**
 ```json
 "IpRateLimiting": {
   "EnableEndpointRateLimiting": true,
@@ -91,79 +91,79 @@ El archivo `appsettings.json` ya contiene una configuración básica, pero puede
     {
       "Endpoint": "*",
       "Period": "1m",
-      "Limit": 60  // 60 solicitudes por minuto
+      "Limit": 60  // 60 requests per minute
     }
   ]
 }
 ```
 
-**Configuración de API Externa:**
+**External API Configuration:**
 ```json
 "ExternalApis": {
   "WebuyAnyCarBaseUrl": "https://staging-api.wbac.dev"
 }
 ```
 
-> ⚠️ **Importante**: En producción, cambia el `SecretKey` del JWT por una clave segura y aleatoria.
+> ⚠️ **Important**: In production, change the JWT `SecretKey` to a secure and random key.
 
-### Paso 4: Verificar la Configuración
+### Step 4: Verify Configuration
 
-Asegúrate de que el archivo `appsettings.json` existe en la ruta:
+Make sure the `appsettings.json` file exists at:
 ```
 UyanycarusaService/appsettings.json
 ```
 
-## ▶️ Cómo Ejecutar el Proyecto
+## ▶️ How to Run the Project
 
-### Opción 1: Ejecutar desde Visual Studio
+### Option 1: Run from Visual Studio
 
-1. Abre el proyecto en Visual Studio 2022
-2. Selecciona el perfil `UyanycarusaService` en la barra de herramientas
-3. Presiona `F5` o haz clic en el botón "Ejecutar"
-4. El navegador se abrirá automáticamente en `http://localhost:5001/swagger`
+1. Open the project in Visual Studio 2022
+2. Select the `UyanycarusaService` profile in the toolbar
+3. Press `F5` or click the "Run" button
+4. The browser will automatically open at `http://localhost:5000/swagger`
 
-### Opción 2: Ejecutar desde la Terminal/CMD
+### Option 2: Run from Terminal/CMD
 
-1. Abre una terminal en la carpeta del proyecto:
+1. Open a terminal in the project folder:
 ```bash
 cd UyanycarusaService
 ```
 
-2. Ejecuta el proyecto:
+2. Run the project:
 ```bash
 dotnet run
 ```
 
-3. El servidor se iniciará y verás un mensaje similar a:
+3. The server will start and you'll see a message similar to:
 ```
-Now listening on: http://localhost:5001
+Now listening on: http://localhost:5000
 ```
 
-4. Abre tu navegador y navega a:
-   - **Swagger UI**: `http://localhost:5001/swagger`
-   - **Health Check**: `http://localhost:5001/health`
+4. Open your browser and navigate to:
+   - **Swagger UI**: `http://localhost:5000/swagger`
+   - **Health Check**: `http://localhost:5000/health`
 
-### Opción 3: Ejecutar con Docker
+### Option 3: Run with Docker
 
-1. Desde la raíz del proyecto backend (`we-buy-any-car-back`), construye la imagen:
+1. From the backend project root (`we-buy-any-car-back`), build the image:
 ```bash
 docker build -t uyanycarusa-service -f UyanycarusaService/Dockerfile .
 ```
 
-2. Ejecuta el contenedor:
+2. Run the container:
 ```bash
 docker run -p 8080:8080 uyanycarusa-service
 ```
 
-3. La API estará disponible en: `http://localhost:8080`
+3. The API will be available at: `http://localhost:8080`
 
-## 🔑 Autenticación
+## 🔑 Authentication
 
-La mayoría de los endpoints requieren autenticación JWT. Para obtener un token:
+Most endpoints require JWT authentication. To obtain a token:
 
-1. **Obtener Token JWT:**
+1. **Get JWT Token:**
    ```bash
-   POST http://localhost:5001/api/v1/auth/login
+   POST http://localhost:5000/api/v1/auth/login
    Content-Type: application/json
    
    {
@@ -172,109 +172,109 @@ La mayoría de los endpoints requieren autenticación JWT. Para obtener un token
    }
    ```
 
-2. **Usar el Token:**
-   Incluye el token en el header `Authorization` de tus solicitudes:
+2. **Use the Token:**
+   Include the token in the `Authorization` header of your requests:
    ```
-   Authorization: Bearer <tu-token-jwt>
+   Authorization: Bearer <your-jwt-token>
    ```
 
-3. **En Swagger UI:**
-   - Haz clic en el botón "Authorize" 🔒
-   - Ingresa: `Bearer <tu-token-jwt>`
-   - Haz clic en "Authorize"
+3. **In Swagger UI:**
+   - Click the "Authorize" button 🔒
+   - Enter: `Bearer <your-jwt-token>`
+   - Click "Authorize"
 
-> **Nota**: Actualmente, el endpoint de login acepta cualquier credencial. En producción, esto debe validarse contra una base de datos o servicio de autenticación.
+> **Note**: Currently, the login endpoint accepts any credentials. In production, this should be validated against a database or authentication service.
 
-## 📡 Endpoints Principales
+## 📡 Main Endpoints
 
-### Autenticación
-- `POST /api/v1/auth/login` - Obtener token JWT (público)
+### Authentication
+- `POST /api/v1/auth/login` - Get JWT token (public)
 
-### Vehículos
-- `GET /api/v1/vehicles/years` - Obtener años disponibles (requiere autenticación)
-- `GET /api/v1/vehicles/makes/{year}` - Obtener marcas por año (requiere autenticación)
-- `GET /api/v1/vehicles/models/{year}/{make}` - Obtener modelos por año y marca (requiere autenticación)
+### Vehicles
+- `GET /api/v1/vehicles/years` - Get available years (requires authentication)
+- `GET /api/v1/vehicles/makes/{year}` - Get makes by year (requires authentication)
+- `GET /api/v1/vehicles/models/{year}/{make}` - Get models by year and make (requires authentication)
 
-### Valuaciones
-- `POST /api/v1/valuation` - Crear una valuación (requiere autenticación)
+### Valuations
+- `POST /api/v1/valuation` - Create a valuation (requires authentication)
 
-### Citas
-- `POST /api/v1/appointment` - Crear una cita (requiere autenticación)
+### Appointments
+- `POST /api/v1/appointment` - Create an appointment (requires authentication)
 
-### Otros Endpoints
-- `GET /health` - Health check (público)
-- `GET /swagger` - Documentación Swagger (solo en desarrollo)
+### Other Endpoints
+- `GET /health` - Health check (public)
+- `GET /swagger` - Swagger documentation (development only)
 
-Para ver todos los endpoints disponibles, visita `/swagger` cuando el proyecto esté en ejecución.
+To see all available endpoints, visit `/swagger` when the project is running.
 
 ## 🧪 Testing
 
-El proyecto incluye un proyecto de pruebas en `UyanycarusaService.Tests`. Para ejecutar las pruebas:
+The project includes a test project in `UyanycarusaService.Tests`. To run the tests:
 
 ```bash
 cd UyanycarusaService.Tests
 dotnet test
 ```
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 we-buy-any-car-back/
 ├── UyanycarusaService/
-│   ├── Controllers/          # Controladores de la API
-│   ├── Services/             # Lógica de negocio
-│   │   └── Interfaces/       # Interfaces de servicios
+│   ├── Controllers/          # API controllers
+│   ├── Services/             # Business logic
+│   │   └── Interfaces/       # Service interfaces
 │   ├── Dtos/                 # Data Transfer Objects
-│   ├── Middlewares/          # Middlewares personalizados
-│   ├── ModelsTests/          # Datos de prueba
-│   ├── Configuration/        # Configuraciones
-│   ├── Properties/           # Configuración de lanzamiento
-│   ├── Program.cs            # Punto de entrada
-│   ├── appsettings.json      # Configuración de la aplicación
+│   ├── Middlewares/          # Custom middlewares
+│   ├── ModelsTests/          # Test data
+│   ├── Configuration/        # Configurations
+│   ├── Properties/           # Launch configuration
+│   ├── Program.cs            # Entry point
+│   ├── appsettings.json      # Application configuration
 │   └── UyanycarusaService.csproj
-├── UyanycarusaService.Tests/ # Proyecto de pruebas
-└── README.md                 # Este archivo
+├── UyanycarusaService.Tests/ # Test project
+└── README.md                 # This file
 ```
 
-## 🔧 Configuración de Entornos
+## 🔧 Environment Configuration
 
-El proyecto soporta diferentes entornos mediante variables de entorno:
+The project supports different environments through environment variables:
 
 - **Development**: `ASPNETCORE_ENVIRONMENT=Development`
 - **Production**: `ASPNETCORE_ENVIRONMENT=Production`
 
-En desarrollo, Swagger está habilitado. En producción, HTTPS es obligatorio.
+In development, Swagger is enabled. In production, HTTPS is mandatory.
 
-## 🐛 Solución de Problemas
+## 🐛 Troubleshooting
 
 ### Error: "JWT SecretKey is not configured"
-- Verifica que el archivo `appsettings.json` contenga la sección `JwtSettings` con `SecretKey`
+- Verify that the `appsettings.json` file contains the `JwtSettings` section with `SecretKey`
 
 ### Error: "Cannot connect to external API"
-- Verifica que la URL en `ExternalApis:WebuyAnyCarBaseUrl` sea correcta
-- Verifica tu conexión a internet
-- Revisa los logs para más detalles del error
+- Verify that the URL in `ExternalApis:WebuyAnyCarBaseUrl` is correct
+- Check your internet connection
+- Review the logs for more error details
 
-### Puerto ya en uso
-- Cambia el puerto en `Properties/launchSettings.json` o usa:
+### Port already in use
+- Change the port in `Properties/launchSettings.json` or use:
 ```bash
 dotnet run --urls "http://localhost:5002"
 ```
 
-## 📝 Notas Adicionales
+## 📝 Additional Notes
 
-- La carpeta `bin/` y `obj/` pueden eliminarse de forma segura. Se regeneran automáticamente al compilar.
-- El proyecto usa datos de prueba cuando `dataTest: true` está en `appsettings.json`
-- Los logs se configuran en `appsettings.json` bajo la sección `Logging`
+- The `bin/` and `obj/` folders can be safely deleted. They are automatically regenerated when compiling.
+- The project uses test data when `dataTest: true` is set in `appsettings.json`
+- Logs are configured in `appsettings.json` under the `Logging` section
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto es privado y de uso interno.
+This project is private and for internal use.
 
-## 👥 Contribuidores
+## 👥 Contributors
 
-Equipo de desarrollo WeBuyAnyCar USA
+WeBuyAnyCar USA Development Team
 
 ---
 
-**¿Necesitas ayuda?** Revisa la documentación de Swagger en `/swagger` o contacta al equipo de desarrollo.
+**Need help?** Check the Swagger documentation at `/swagger` or contact the development team.

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace UyanycarusaService.Dtos
 {
     /// <summary>
-    /// Modelo para solicitar un código OTP
+    /// Model for requesting an OTP code
     /// </summary>
     public class ScheduleOTPRequest
     {

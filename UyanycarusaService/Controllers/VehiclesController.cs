@@ -1,19 +1,18 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
 using System.Text.Json;
 using UyanycarusaService.Services;
-using System.IO;
 
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones relacionadas con vehículos
+    /// Controller for all vehicle-related operations.
+    /// Requires valid JWT authentication for all endpoints.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/[controller]")]
-    [Authorize]
+    [AllowAnonymous]
     public class VehiclesController : ControllerBase
     {
         private readonly IVehiclesService _vehiclesService;
@@ -26,13 +25,9 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Obtiene la lista de años disponibles de vehículos desde el servicio externo
+        /// Retrieves the available vehicle years from the external service.
         /// </summary>
-        /// <returns>Lista de años disponibles (enteros)</returns>
-        /// <response code="200">Retorna la lista de años exitosamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <returns>List of available years.</returns>
         [HttpGet("years")]
         [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -47,31 +42,27 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                // _logger.LogError(ex, "Error de comunicación con el servicio externo");
-                return StatusCode(500, new {
-                    message = "Error al comunicarse con el servicio externo",
+                return StatusCode(500, new
+                {
+                    message = "Error communicating with the external vehicle service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                // _logger.LogError(ex, "Error inesperado al obtener años de vehículos");
-                return StatusCode(500, new {
-                    message = "Error inesperado al procesar la solicitud",
+                return StatusCode(500, new
+                {
+                    message = "Unexpected error processing the request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene la lista de marcas disponibles para un año específico desde el servicio externo
+        /// Retrieves available makes for a specific year.
         /// </summary>
-        /// <param name="year">Año del vehículo</param>
-        /// <returns>Lista de marcas disponibles (strings)</returns>
-        /// <response code="200">Retorna la lista de marcas exitosamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="year">Vehicle year.</param>
+        /// <returns>List of available makes.</returns>
         [HttpGet("makes/{year}")]
         [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -86,30 +77,28 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return StatusCode(500, new {
-                    message = "Error al comunicarse con el servicio externo",
+                return StatusCode(500, new
+                {
+                    message = "Error communicating with the external vehicle service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new {
-                    message = "Error inesperado al procesar la solicitud",
+                return StatusCode(500, new
+                {
+                    message = "Unexpected error processing the request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene la lista de modelos disponibles para un año y marca específicos desde el servicio externo
+        /// Retrieves available models for a given year and make.
         /// </summary>
-        /// <param name="year">Año del vehículo</param>
-        /// <param name="make">Marca del vehículo</param>
-        /// <returns>Lista de modelos disponibles (strings)</returns>
-        /// <response code="200">Retorna la lista de modelos exitosamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="year">Vehicle year.</param>
+        /// <param name="make">Vehicle make.</param>
+        /// <returns>List of available models.</returns>
         [HttpGet("models/{year}/{make}")]
         [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -124,31 +113,29 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return StatusCode(500, new {
-                    message = "Error al comunicarse con el servicio externo",
+                return StatusCode(500, new
+                {
+                    message = "Error communicating with the external vehicle service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new {
-                    message = "Error inesperado al procesar la solicitud",
+                return StatusCode(500, new
+                {
+                    message = "Unexpected error processing the request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene la lista de trims (versiones/equipamientos) disponibles para un año, marca y modelo específicos desde el servicio externo
+        /// Retrieves available trim information for a given year, make, and model.
         /// </summary>
-        /// <param name="year">Año del vehículo</param>
-        /// <param name="make">Marca del vehículo</param>
-        /// <param name="model">Modelo del vehículo</param>
-        /// <returns>Lista de trims disponibles (array de objetos con bodystyle, series, imageUrl)</returns>
-        /// <response code="200">Retorna la lista de trims exitosamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="year">Vehicle year.</param>
+        /// <param name="make">Vehicle make.</param>
+        /// <param name="model">Vehicle model.</param>
+        /// <returns>Trim list (body style, series, images).</returns>
         [HttpGet("trims/{year}/{make}/{model}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -163,31 +150,31 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return StatusCode(500, new {
-                    message = "Error al comunicarse con el servicio externo",
+                return StatusCode(500, new
+                {
+                    message = "Error communicating with the external vehicle service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new {
-                    message = "Error inesperado al procesar la solicitud",
+                return StatusCode(500, new
+                {
+                    message = "Unexpected error processing the request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene una imagen desde una URL externa
+        /// Retrieves an image from an external URL.
         /// </summary>
-        /// <param name="url">URL de la imagen a obtener</param>
-        /// <returns>Archivo de imagen</returns>
-        /// <response code="200">Retorna la imagen exitosamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al obtener la imagen desde la URL</response>
+        /// <param name="url">External image URL.</param>
+        /// <returns>Binary image stream.</returns>
         [HttpGet("image")]
-        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetImage([FromQuery] string url)
         {
@@ -195,12 +182,12 @@ namespace UyanycarusaService.Controllers
             {
                 if (string.IsNullOrWhiteSpace(url))
                 {
-                    return BadRequest(new { message = "La URL es requerida" });
+                    return BadRequest(new { message = "Image URL is required." });
                 }
 
-                var (imageContent, contentType) = await _vehiclesService.GetImageAsync(url);
+                var (imageBytes, contentType) = await _vehiclesService.GetImageAsync(url);
 
-                var stream = new MemoryStream(imageContent);
+                var stream = new MemoryStream(imageBytes);
 
                 return new FileStreamResult(stream, contentType)
                 {
@@ -211,7 +198,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo para obtener la imagen",
+                    message = "Error fetching image from external provider.",
                     detail = ex.Message
                 });
             }
@@ -219,12 +206,10 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing the image request.",
                     detail = ex.Message
                 });
             }
         }
-
     }
 }
-

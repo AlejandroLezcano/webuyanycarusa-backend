@@ -6,7 +6,8 @@ using UyanycarusaService.Services;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de contenido
+    /// Controller for dynamic website content (FAQs, landing pages, etc.).
+    /// All endpoints require a valid JWT token.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
@@ -18,19 +19,21 @@ namespace UyanycarusaService.Controllers
         private readonly IContentService _contentService;
         private readonly ILogger<ContentController> _logger;
 
-        public ContentController(IContentService contentService, ILogger<ContentController> logger)
+        public ContentController(
+            IContentService contentService,
+            ILogger<ContentController> logger)
         {
             _contentService = contentService;
             _logger = logger;
         }
 
+        // --------------------------------------------------------------------
+        // FAQs
+        // --------------------------------------------------------------------
+
         /// <summary>
-        /// Obtiene la lista de categorías de FAQs
+        /// Retrieves a list of FAQ categories.
         /// </summary>
-        /// <returns>Respuesta con lista de categorías de FAQs del servicio externo</returns>
-        /// <response code="200">Lista de FAQs obtenida correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpGet("faqs")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -44,31 +47,27 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex, "Communication error calling external FAQ service.");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de FAQs",
+                    message = "Error communicating with the external FAQ service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error retrieving FAQs.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de FAQs",
+                    message = "Unexpected error while processing the FAQs request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene el detalle de FAQs por slug
+        /// Retrieves detailed FAQs for a specific slug.
         /// </summary>
-        /// <param name="slug">Slug de la categoría de FAQ</param>
-        /// <returns>Respuesta con FAQs detalladas del servicio externo</returns>
-        /// <response code="200">FAQs obtenidas correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">FAQ no encontrada</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpGet("faqs/{slug}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -83,29 +82,37 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex,
+                    "Communication error calling external FAQ service for slug: {Slug}",
+                    slug);
+
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de FAQs",
+                    message = "Error communicating with the external FAQ service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex,
+                    "Unexpected error retrieving FAQ detail for slug: {Slug}",
+                    slug);
+
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de FAQs",
+                    message = "Unexpected error while processing the FAQ detail request.",
                     detail = ex.Message
                 });
             }
         }
 
+        // --------------------------------------------------------------------
+        // Landing Pages
+        // --------------------------------------------------------------------
+
         /// <summary>
-        /// Obtiene la lista de páginas de landing disponibles
+        /// Retrieves a list of available landing pages.
         /// </summary>
-        /// <returns>Respuesta con lista de páginas de landing del servicio externo</returns>
-        /// <response code="200">Lista de landing pages obtenida correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpGet("landing-page")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -119,31 +126,29 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex,
+                    "Communication error calling external landing page service.");
+
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de landing pages",
+                    message = "Error communicating with the external landing page service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error retrieving landing pages.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de landing pages",
+                    message = "Unexpected error while processing the landing pages request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene el contenido de una página de landing por slug
+        /// Retrieves the content of a landing page by slug.
         /// </summary>
-        /// <param name="slug">Slug de la página de landing</param>
-        /// <returns>Respuesta con contenido de la página de landing del servicio externo</returns>
-        /// <response code="200">Landing page obtenida correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Landing page no encontrada</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpGet("landing-page/{slug}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -158,22 +163,29 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex,
+                    "Communication error calling external landing page service for slug: {Slug}",
+                    slug);
+
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de landing pages",
+                    message = "Error communicating with the external landing page service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex,
+                    "Unexpected error retrieving landing page content for slug: {Slug}",
+                    slug);
+
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de landing page",
+                    message = "Unexpected error while processing the landing page content request.",
                     detail = ex.Message
                 });
             }
         }
-
     }
 }
-
+    

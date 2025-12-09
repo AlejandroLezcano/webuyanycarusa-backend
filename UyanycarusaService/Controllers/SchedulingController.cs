@@ -7,7 +7,8 @@ using UyanycarusaService.Dtos;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de Scheduling (OTP)
+    /// Controller for Scheduling (OTP) operations.
+    /// All endpoints require a valid JWT token.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
@@ -26,16 +27,16 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Solicita un código OTP para programación
+        /// Requests an OTP code for scheduling.
         /// </summary>
-        /// <param name="model">Datos de la solicitud OTP</param>
-        /// <returns>Respuesta de solicitud OTP del servicio externo</returns>
-        /// <response code="202">Solicitud OTP aceptada</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Recurso no encontrado</response>
-        /// <response code="429">Demasiadas solicitudes</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="model">OTP request payload.</param>
+        /// <returns>OTP response from the external service.</returns>
+        /// <response code="202">OTP request accepted.</response>
+        /// <response code="400">Invalid request sent to the external service.</response>
+        /// <response code="401">Unauthorized. A valid JWT token is required.</response>
+        /// <response code="404">Resource not found by external provider.</response>
+        /// <response code="429">Too many requests (rate limited).</response>
+        /// <response code="500">Unexpected error communicating with external OTP provider.</response>
         [HttpPost("request")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -49,25 +50,27 @@ namespace UyanycarusaService.Controllers
             {
                 var jsonElement = JsonSerializer.SerializeToElement(model);
                 var result = await _schedulingService.RequestOTPAsync(jsonElement);
+
                 return StatusCode(202, result);
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex, "Error while communicating with external OTP service.");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de OTP",
+                    message = "Error communicating with external OTP service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error while processing OTP request.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de OTP",
+                    message = "Unexpected error processing OTP request.",
                     detail = ex.Message
                 });
             }
         }
     }
 }
-

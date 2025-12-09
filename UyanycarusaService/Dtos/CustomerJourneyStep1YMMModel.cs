@@ -3,15 +3,15 @@ using System.ComponentModel.DataAnnotations;
 namespace UyanycarusaService.Dtos
 {
     /// <summary>
-    /// Modelo para iniciar un customer journey usando Year, Make, Model
+    /// Model to start a customer journey using Year, Make, Model
     /// </summary>
     public class CustomerJourneyStep1YMMModel
     {
-        [Required]
-        public long VisitId { get; set; }
+        public long? VisitId { get; set; }
 
         [Required]
-        [MinLength(1)]
+        [MinLength(4)]
+        [MaxLength(4)]
         [RegularExpression(@"^\d{4}$", ErrorMessage = "Year must be 4 digits")]
         public string Year { get; set; } = string.Empty;
 

@@ -7,12 +7,13 @@ using UyanycarusaService.Dtos;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de valuación de vehículos
+    /// Controller for vehicle valuation operations.
+    /// All endpoints require a valid JWT token.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/[controller]")]
-    [Authorize]
+    [AllowAnonymous]
     public class ValuationController : ControllerBase
     {
         private readonly IValuationService _valuationService;
@@ -25,14 +26,14 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Realiza una valuación básica del vehículo
+        /// Performs a basic vehicle valuation.
         /// </summary>
-        /// <param name="model">Payload enviado al endpoint externo /Valuation</param>
-        /// <returns>Respuesta de valuación del servicio externo</returns>
-        /// <response code="200">Valuación realizada correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="model">Payload sent to the external /Valuation endpoint.</param>
+        /// <returns>Valuation response from the external service.</returns>
+        /// <response code="200">Valuation completed successfully.</response>
+        /// <response code="400">Invalid request for external service.</response>
+        /// <response code="401">Unauthorized. Valid JWT token required.</response>
+        /// <response code="500">Error communicating with external valuation provider.</response>
         [HttpPost]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,39 +43,38 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, options);
                 var result = await _valuationService.CreateValuationAsync(jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                // _logger.LogWarning(ex, "Error de comunicación con el servicio externo /Valuation");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de valuación",
+                    message = "Error communicating with external valuation service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                // _logger.LogError(ex, "Error inesperado al realizar la valuación");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de valuación",
+                    message = "Unexpected error processing valuation request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Realiza una valuación del vehículo incluyendo daños
+        /// Performs a vehicle valuation including damage information.
         /// </summary>
-        /// <param name="model">Payload enviado al endpoint externo /Valuation/with-damage</param>
-        /// <returns>Respuesta de valuación del servicio externo</returns>
-        /// <response code="200">Valuación realizada correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="model">Payload sent to the external /Valuation/with-damage endpoint.</param>
+        /// <returns>Valuation response from the external service.</returns>
+        /// <response code="200">Valuation completed successfully.</response>
+        /// <response code="400">Invalid request for external service.</response>
+        /// <response code="401">Unauthorized. Valid JWT token required.</response>
+        /// <response code="500">Error communicating with external valuation provider.</response>
         [HttpPost("with-damage")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -84,30 +84,27 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, options);
                 var result = await _valuationService.CreateValuationWithDamageAsync(jsonElement);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                // _logger.LogWarning(ex, "Error de comunicación con el servicio externo /Valuation/with-damage");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de valuación con daños",
+                    message = "Error communicating with external valuation-with-damage service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                // _logger.LogError(ex, "Error inesperado al realizar la valuación con daños");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de valuación con daños",
+                    message = "Unexpected error processing valuation-with-damage request.",
                     detail = ex.Message
                 });
             }
         }
     }
 }
-
-

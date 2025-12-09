@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace UyanycarusaService.Services
 {
     /// <summary>
-    /// Servicio para operaciones de citas (appointments)
+    /// Service for appointment operations
     /// </summary>
     public class AppointmentService : IAppointmentService
     {
@@ -42,20 +42,20 @@ namespace UyanycarusaService.Services
                     return json;
                 }
 
-                _logger.LogWarning("El servicio externo /Appointment/availability retornó un código de estado: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("External service /Appointment/availability returned status code: {StatusCode}", response.StatusCode);
 
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException(
-                    $"Error al obtener disponibilidad de citas. StatusCode: {response.StatusCode}, Detail: {errorContent}");
+                    $"Error getting appointment availability. StatusCode: {response.StatusCode}, Detail: {errorContent}");
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Appointment/availability");
+                _logger.LogError(ex, "Error communicating with external service /Appointment/availability");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al obtener disponibilidad de citas");
+                _logger.LogError(ex, "Unexpected error getting appointment availability");
                 throw;
             }
         }
@@ -82,19 +82,19 @@ namespace UyanycarusaService.Services
                     return json;
                 }
 
-                _logger.LogWarning("El servicio externo /Appointment/book retornó un código de estado: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("External service /Appointment/book returned status code: {StatusCode}", response.StatusCode);
 
                 throw new HttpRequestException(
-                    $"Error al reservar la cita. StatusCode: {response.StatusCode}, Detail: {content}");
+                    $"Error booking appointment. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Appointment/book");
+                _logger.LogError(ex, "Error communicating with external service /Appointment/book");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al reservar la cita");
+                _logger.LogError(ex, "Unexpected error booking appointment");
                 throw;
             }
         }
@@ -121,19 +121,19 @@ namespace UyanycarusaService.Services
                     return json;
                 }
 
-                _logger.LogWarning("El servicio externo /Appointment/reschedule retornó un código de estado: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("External service /Appointment/reschedule returned status code: {StatusCode}", response.StatusCode);
 
                 throw new HttpRequestException(
-                    $"Error al reprogramar la cita. StatusCode: {response.StatusCode}, Detail: {content}");
+                    $"Error rescheduling appointment. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Appointment/reschedule");
+                _logger.LogError(ex, "Error communicating with external service /Appointment/reschedule");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al reprogramar la cita");
+                _logger.LogError(ex, "Unexpected error rescheduling appointment");
                 throw;
             }
         }
@@ -157,19 +157,19 @@ namespace UyanycarusaService.Services
                     return json;
                 }
 
-                _logger.LogWarning("El servicio externo /Appointment/cancel retornó un código de estado: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("External service /Appointment/cancel returned status code: {StatusCode}", response.StatusCode);
 
                 throw new HttpRequestException(
-                    $"Error al cancelar la cita. StatusCode: {response.StatusCode}, Detail: {content}");
+                    $"Error canceling appointment. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo /Appointment/cancel");
+                _logger.LogError(ex, "Error communicating with external service /Appointment/cancel");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al cancelar la cita");
+                _logger.LogError(ex, "Unexpected error canceling appointment");
                 throw;
             }
         }

@@ -29,11 +29,13 @@ namespace UyanycarusaService.Services
         {
             try
             {
-
+                // Remove null properties before sending to external service
+                var cleanedModel = RemoveNullProperties(model);
+                
                 var accessToken = await _tokenService.GetAccessTokenAsync();
                 var request = new HttpRequestMessage(HttpMethod.Post, "/customer-journey")
                 {
-                    Content = JsonContent.Create(model)
+                    Content = JsonContent.Create(cleanedModel)
                 };
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -48,16 +50,16 @@ namespace UyanycarusaService.Services
 
 
                 throw new HttpRequestException(
-                    $"Error al crear customer journey con YMM. StatusCode: {response.StatusCode}, Detail: {content}");
+                    $"Error creating customer journey with YMM. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo /customer-journey");
+                _logger.LogError(ex, "Error communicating with external service /customer-journey");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al crear customer journey con YMM");
+                _logger.LogError(ex, "Unexpected error creating customer journey with YMM");
                 throw;
             }
         }
@@ -67,11 +69,13 @@ namespace UyanycarusaService.Services
         {
             try
             {
-
+                // Remove null properties before sending to external service
+                var cleanedModel = RemoveNullProperties(model);
+                
                 var accessToken = await _tokenService.GetAccessTokenAsync();
                 var request = new HttpRequestMessage(HttpMethod.Post, "/customer-journey/vin")
                 {
-                    Content = JsonContent.Create(model)
+                    Content = JsonContent.Create(cleanedModel)
                 };
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -85,19 +89,19 @@ namespace UyanycarusaService.Services
                     return json;
                 }
 
-                _logger.LogWarning("El servicio externo /customer-journey/vin retornó un código de estado: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("External service /customer-journey/vin returned status code: {StatusCode}", response.StatusCode);
 
                 throw new HttpRequestException(
-                    $"Error al crear customer journey con VIN. StatusCode: {response.StatusCode}, Detail: {content}");
+                    $"Error creating customer journey with VIN. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo /customer-journey/vin");
+                _logger.LogError(ex, "Error communicating with external service /customer-journey/vin");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al crear customer journey con VIN");
+                _logger.LogError(ex, "Unexpected error creating customer journey with VIN");
                 throw;
             }
         }
@@ -107,17 +111,21 @@ namespace UyanycarusaService.Services
         {
             try
             {
-
+                // Remove null properties before sending to external service
+                var cleanedModel = RemoveNullProperties(model);
+                _logger.LogWarning("Sending plate data to external service: {Model}", cleanedModel.ToString());
+                
                 var accessToken = await _tokenService.GetAccessTokenAsync();
                 var request = new HttpRequestMessage(HttpMethod.Post, "/customer-journey/plate")
                 {
-                    Content = JsonContent.Create(model)
+                    Content = JsonContent.Create(cleanedModel)
                 };
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
                 using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
+                _logger.LogWarning("External service response: StatusCode={StatusCode}, Content={Content}", response.StatusCode, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -125,21 +133,43 @@ namespace UyanycarusaService.Services
                     return json;
                 }
 
-                _logger.LogWarning("El servicio externo /customer-journey/plate retornó un código de estado: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("External service /customer-journey/plate returned status code: {StatusCode}", response.StatusCode);
 
                 throw new HttpRequestException(
-                    $"Error al crear customer journey con Plate. StatusCode: {response.StatusCode}, Detail: {content}");
+                    $"Error creating customer journey with Plate. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo /customer-journey/plate");
+                _logger.LogError(ex, "Error communicating with external service /customer-journey/plate");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al crear customer journey con Plate");
+                _logger.LogError(ex, "Unexpected error creating customer journey with Plate");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Removes properties with null values from a JsonElement
+        /// </summary>
+        private JsonElement RemoveNullProperties(JsonElement element)
+        {
+            if (element.ValueKind != JsonValueKind.Object)
+            {
+                return element;
+            }
+
+            var dictionary = new Dictionary<string, object>();
+            foreach (var property in element.EnumerateObject())
+            {
+                if (property.Value.ValueKind != JsonValueKind.Null)
+                {
+                    dictionary[property.Name] = property.Value;
+                }
+            }
+
+            return JsonSerializer.SerializeToElement(dictionary);
         }
 
         /// <inheritdoc />

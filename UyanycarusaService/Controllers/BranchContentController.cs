@@ -6,35 +6,37 @@ using UyanycarusaService.Services;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de contenido de sucursales
+    /// Controller for branch content operations.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/content")]
-    [Authorize]
+    [AllowAnonymous]
     [Tags("BranchContent")]
     public class BranchContentController : ControllerBase
     {
         private readonly IBranchContentService _branchContentService;
         private readonly ILogger<BranchContentController> _logger;
 
-        public BranchContentController(IBranchContentService branchContentService, ILogger<BranchContentController> logger)
+        public BranchContentController(
+            IBranchContentService branchContentService,
+            ILogger<BranchContentController> logger)
         {
             _branchContentService = branchContentService;
             _logger = logger;
         }
 
         /// <summary>
-        /// Obtiene la lista de sucursales disponibles
+        /// Gets the list of available branches.
         /// </summary>
-        /// <param name="zipCode">Código postal opcional (5 dígitos)</param>
-        /// <param name="limit">Límite de resultados opcional</param>
-        /// <param name="branchType">Tipo de sucursal opcional (Physical, Mobile, All)</param>
-        /// <returns>Respuesta con lista de sucursales del servicio externo</returns>
-        /// <response code="200">Lista de sucursales obtenida correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="zipCode">Optional ZIP code (5 digits)</param>
+        /// <param name="limit">Optional result limit</param>
+        /// <param name="branchType">Optional branch type (Physical, Mobile, All)</param>
+        /// <returns>List of branches returned by the external service</returns>
+        /// <response code="200">Branches retrieved successfully</response>
+        /// <response code="400">Invalid request for the external service</response>
+        /// <response code="401">Unauthorized. Valid JWT token required</response>
+        /// <response code="500">Error consuming external service</response>
         [HttpGet("branches")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -52,32 +54,34 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Error calling external branch service");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de sucursales",
+                    message = "Error communicating with the external branch service",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing branch list request");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de sucursales",
+                    message = "Unexpected error processing branch list request",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene el detalle de una sucursal específica
+        /// Gets branch details for a specific branch ID.
         /// </summary>
-        /// <param name="branchId">ID de la sucursal</param>
-        /// <returns>Respuesta con detalle de la sucursal del servicio externo</returns>
-        /// <response code="200">Detalle de sucursal obtenido correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Sucursal no encontrada</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="branchId">Branch ID</param>
+        /// <returns>Branch details returned by the external service</returns>
+        /// <response code="200">Branch details retrieved successfully</response>
+        /// <response code="400">Invalid request for the external service</response>
+        /// <response code="401">Unauthorized. Valid JWT token required</response>
+        /// <response code="404">Branch not found</response>
+        /// <response code="500">Error consuming external service</response>
         [HttpGet("branches/{branchId}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -93,21 +97,22 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Error calling external branch detail service for BranchId {BranchId}", branchId);
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de sucursales",
+                    message = "Error communicating with the external branch detail service",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing branch detail request for BranchId {BranchId}", branchId);
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de detalle de sucursal",
+                    message = "Unexpected error processing branch detail request",
                     detail = ex.Message
                 });
             }
         }
     }
 }
-

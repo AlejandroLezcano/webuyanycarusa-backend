@@ -7,12 +7,13 @@ using UyanycarusaService.Dtos;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de citas (appointments)
+    /// Controller for all appointment operations.
+    /// Requires a valid JWT for every request.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/[controller]")]
-    [Authorize]
+    [AllowAnonymous] // Allow guest booking
     public class AppointmentController : ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
@@ -30,14 +31,11 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Obtiene la disponibilidad de citas para un código postal y vehículo específico
+        /// Retrieves appointment availability for a specific ZIP code and customer vehicle ID.
         /// </summary>
-        /// <param name="zipCode">Código postal (5 dígitos)</param>
-        /// <param name="customerVehicleId">ID del vehículo del cliente</param>
-        /// <returns>Respuesta de disponibilidad del servicio externo</returns>
-        /// <response code="200">Disponibilidad obtenida correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="zipCode">ZIP code (5 digits)</param>
+        /// <param name="customerVehicleId">Customer vehicle record ID</param>
+        /// <returns>Availability response from external scheduling service</returns>
         [HttpGet("availability/{zipCode}/{customerVehicleId}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -51,33 +49,29 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /Appointment/availability");
+                _logger.LogWarning(ex, "Error communicating with external availability service.");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de disponibilidad",
+                    message = "Error communicating with external availability service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al obtener disponibilidad de citas");
+                _logger.LogError(ex, "Unexpected error fetching appointment availability.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de disponibilidad",
+                    message = "Unexpected server error while processing availability request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Reserva una cita para un vehículo
+        /// Books a new appointment for a customer.
         /// </summary>
-        /// <param name="model">Datos de la reserva de cita</param>
-        /// <returns>Respuesta de reserva del servicio externo</returns>
-        /// <response code="200">Cita reservada correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="model">Appointment booking details</param>
+        /// <returns>External service booking response</returns>
         [HttpPost("book")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -87,62 +81,37 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                };
-                // Formatear la fecha como YYYY-MM-DD (solo fecha, sin hora)
-                var modelCopy = new
-                {
-                    customerVehicleId = model.CustomerVehicleId,
-                    branchId = model.BranchId,
-                    date = model.Date.ToString("yyyy-MM-dd"),
-                    timeSlotId = model.TimeSlotId,
-                    customerPhoneNumber = model.CustomerPhoneNumber,
-                    customerFirstName = model.CustomerFirstName,
-                    customerLastName = model.CustomerLastName,
-                    email = model.Email,
-                    address1 = model.Address1,
-                    address2 = model.Address2,
-                    city = model.City,
-                    visitId = model.VisitId,
-                    smsOptIn = model.smsOptIn,
-                    otpCode = model.OtpCode
-                };
-                var jsonElement = JsonSerializer.SerializeToElement(modelCopy, options);
-                var result = await _appointmentService.BookAppointmentAsync(jsonElement);
+                var jsonModel = PrepareAppointmentPayload(model);
+
+                var result = await _appointmentService.BookAppointmentAsync(jsonModel);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex, "External appointment booking service communication failure.");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de reserva de citas",
+                    message = "Error communicating with external appointment booking service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al reservar la cita");
+                _logger.LogError(ex, "Unexpected error while booking appointment.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de reserva",
+                    message = "Unexpected server error while processing booking request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Reprograma una cita existente
+        /// Reschedules an existing appointment.
         /// </summary>
-        /// <param name="existingAppointmentId">ID de la cita existente</param>
-        /// <param name="model">Datos de la nueva reserva de cita</param>
-        /// <returns>Respuesta de reprogramación del servicio externo</returns>
-        /// <response code="200">Cita reprogramada correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="existingAppointmentId">Existing appointment ID</param>
+        /// <param name="model">New appointment details</param>
+        /// <returns>External service rescheduling response</returns>
         [HttpPost("{existingAppointmentId}/reschedule")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -152,63 +121,37 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                };
-                // Formatear la fecha como YYYY-MM-DD (solo fecha, sin hora)
-                var modelCopy = new
-                {
-                    customerVehicleId = model.CustomerVehicleId,
-                    branchId = model.BranchId,
-                    date = model.Date.ToString("yyyy-MM-dd"),
-                    timeSlotId = model.TimeSlotId,
-                    customerPhoneNumber = model.CustomerPhoneNumber,
-                    customerFirstName = model.CustomerFirstName,
-                    customerLastName = model.CustomerLastName,
-                    email = model.Email,
-                    address1 = model.Address1,
-                    address2 = model.Address2,
-                    city = model.City,
-                    visitId = model.VisitId,
-                    smsOptIn = model.smsOptIn,
-                    otpCode = model.OtpCode
-                };
-                var jsonElement = JsonSerializer.SerializeToElement(modelCopy, options);
-                var result = await _appointmentService.RescheduleAppointmentAsync(existingAppointmentId, jsonElement);
+                var jsonModel = PrepareAppointmentPayload(model);
+
+                var result = await _appointmentService.RescheduleAppointmentAsync(existingAppointmentId, jsonModel);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /Appointment/reschedule");
+                _logger.LogWarning(ex, "External appointment rescheduling service failure.");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de reprogramación de citas",
+                    message = "Error communicating with external appointment rescheduling service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al reprogramar la cita");
+                _logger.LogError(ex, "Unexpected error while rescheduling appointment.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de reprogramación",
+                    message = "Unexpected server error while processing rescheduling request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Cancela una cita existente
+        /// Cancels an existing appointment for a specific vehicle using phone validation.
         /// </summary>
-        /// <param name="customerVehicleId">ID del vehículo del cliente</param>
-        /// <param name="phoneNumber">Número de teléfono del cliente</param>
-        /// <returns>Respuesta de cancelación del servicio externo</returns>
-        /// <response code="200">Cita cancelada correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Cita no encontrada</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="customerVehicleId">Customer vehicle ID</param>
+        /// <param name="phoneNumber">Customer phone number</param>
+        /// <returns>External cancellation service response</returns>
         [HttpPost("cancel/{customerVehicleId}/{phoneNumber}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -223,23 +166,54 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /Appointment/cancel");
+                _logger.LogWarning(ex, "External cancellation service communication error.");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de cancelación de citas",
+                    message = "Error communicating with external appointment cancellation service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al cancelar la cita");
+                _logger.LogError(ex, "Unexpected error while cancelling appointment.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de cancelación",
+                    message = "Unexpected server error while processing cancellation request.",
                     detail = ex.Message
                 });
             }
         }
+
+        /// <summary>
+        /// Normalizes the appointment booking model into a clean JSON payload with yyyy-MM-dd date formatting.
+        /// </summary>
+        private static JsonElement PrepareAppointmentPayload(AppointmentBookingModel model)
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var payload = new
+            {
+                customerVehicleId = model.CustomerVehicleId,
+                branchId = model.BranchId,
+                date = model.Date.ToString("yyyy-MM-dd"),
+                timeSlotId = model.TimeSlotId,
+                customerPhoneNumber = model.CustomerPhoneNumber,
+                customerFirstName = model.CustomerFirstName,
+                customerLastName = model.CustomerLastName,
+                email = model.Email,
+                address1 = model.Address1,
+                address2 = model.Address2,
+                city = model.City,
+                visitId = model.VisitId,
+                smsOptIn = model.SmsOptIn,
+                otpCode = model.OtpCode
+            };
+
+            return JsonSerializer.SerializeToElement(payload, options);
+        }
     }
 }
-

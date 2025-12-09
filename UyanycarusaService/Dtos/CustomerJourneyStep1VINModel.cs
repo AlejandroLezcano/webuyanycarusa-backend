@@ -3,15 +3,15 @@ using System.ComponentModel.DataAnnotations;
 namespace UyanycarusaService.Dtos
 {
     /// <summary>
-    /// Modelo para iniciar un customer journey usando VIN
+    /// Model to start a customer journey using VIN
     /// </summary>
     public class CustomerJourneyStep1VINModel
     {
-        [Required]
-        public long VisitId { get; set; }
+        public long? VisitId { get; set; }
 
         [Required]
-        [MinLength(1)]
+        [MinLength(17)]
+        [MaxLength(17)]
         [System.Text.Json.Serialization.JsonPropertyName("vin")]
         public string Vin { get; set; } = string.Empty;
     }

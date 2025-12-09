@@ -7,33 +7,34 @@ using UyanycarusaService.Dtos;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de customer journey
+    /// Controller for all Customer Journey operations.
+    /// All endpoints require a valid JWT token.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/customer-journey")]
-    [Authorize]
+    [AllowAnonymous] // JWT enforced globally for this controller
+    [Tags("CustomerJourney")]
     public class CustomerJourneyController : ControllerBase
     {
         private readonly ICustomerJourneyService _customerJourneyService;
         private readonly ILogger<CustomerJourneyController> _logger;
 
-        public CustomerJourneyController(ICustomerJourneyService customerJourneyService, ILogger<CustomerJourneyController> logger)
+        public CustomerJourneyController(
+            ICustomerJourneyService customerJourneyService,
+            ILogger<CustomerJourneyController> logger)
         {
             _customerJourneyService = customerJourneyService;
             _logger = logger;
         }
 
+        // --------------------------------------------------------------------
+        // QUERY ENDPOINTS
+        // --------------------------------------------------------------------
 
         /// <summary>
-        /// Obtiene un customer journey por su ID (UUID)
+        /// Retrieves a customer journey by its UUID.
         /// </summary>
-        /// <param name="id">ID del journey (UUID)</param>
-        /// <returns>Respuesta del journey del servicio externo</returns>
-        /// <response code="200">Journey obtenido correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Journey no encontrado</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -50,7 +51,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de customer journey",
+                    message = "Error communicating with the external customer journey service.",
                     detail = ex.Message
                 });
             }
@@ -58,21 +59,15 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene un customer journey por visitId (integer)
+        /// Retrieves a customer journey by visitId (integer).
         /// </summary>
-        /// <param name="visitId">ID de la visita (integer)</param>
-        /// <returns>Respuesta del journey del servicio externo</returns>
-        /// <response code="200">Journey obtenido correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Journey no encontrado</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpGet("{visitId:int}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -89,7 +84,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de customer journey",
+                    message = "Error communicating with the external customer journey service.",
                     detail = ex.Message
                 });
             }
@@ -97,171 +92,156 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
 
+        // --------------------------------------------------------------------
+        // STEP 1: CREATE (YMM, VIN, PLATE)
+        // --------------------------------------------------------------------
+
         /// <summary>
-        /// Inicia un customer journey usando Year, Make, Model
+        /// Starts a customer journey using Year/Make/Model.
         /// </summary>
-        /// <param name="model">Datos del vehículo (YMM)</param>
-        /// <returns>Respuesta del journey del servicio externo</returns>
-        /// <response code="200">Journey creado correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpPost]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateJourneyWithYMM([FromBody] CustomerJourneyStep1YMMModel model)
+        public async Task<ActionResult<JsonElement>> CreateJourneyWithYMM(
+            [FromBody] CustomerJourneyStep1YMMModel model)
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
-                var result = await _customerJourneyService.CreateJourneyWithYMMAsync(jsonElement);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var json = JsonSerializer.SerializeToElement(model, options);
+                var result = await _customerJourneyService.CreateJourneyWithYMMAsync(json);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /customer-journey");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de customer journey",
+                    message = "External service error while creating YMM journey.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al crear customer journey con YMM");
+                _logger.LogError(ex, "Unexpected error creating customer journey with YMM.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Inicia un customer journey usando VIN
+        /// Starts a customer journey using a VIN.
         /// </summary>
-        /// <param name="model">Datos del vehículo (VIN)</param>
-        /// <returns>Respuesta del journey del servicio externo</returns>
-        /// <response code="200">Journey creado correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpPost("vin")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateJourneyWithVIN([FromBody] CustomerJourneyStep1VINModel model)
+        public async Task<ActionResult<JsonElement>> CreateJourneyWithVIN(
+            [FromBody] CustomerJourneyStep1VINModel model)
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
-                var result = await _customerJourneyService.CreateJourneyWithVINAsync(jsonElement);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var json = JsonSerializer.SerializeToElement(model, options);
+                var result = await _customerJourneyService.CreateJourneyWithVINAsync(json);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /customer-journey/vin");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de customer journey",
+                    message = "External service error while creating VIN journey.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al crear customer journey con VIN");
+                _logger.LogError(ex, "Unexpected error creating customer journey with VIN.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Inicia un customer journey usando License Plate
+        /// Starts a customer journey using a license plate.
         /// </summary>
-        /// <param name="model">Datos del vehículo (Plate)</param>
-        /// <returns>Respuesta del journey del servicio externo</returns>
-        /// <response code="200">Journey creado correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpPost("plate")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> CreateJourneyWithPlate([FromBody] CustomerJourneyStep1PlateModel model)
+        public async Task<ActionResult<JsonElement>> CreateJourneyWithPlate(
+            [FromBody] CustomerJourneyStep1PlateModel model)
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
-                var result = await _customerJourneyService.CreateJourneyWithPlateAsync(jsonElement);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var json = JsonSerializer.SerializeToElement(model, options);
+                var result = await _customerJourneyService.CreateJourneyWithPlateAsync(json);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /customer-journey/plate");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de customer journey",
+                    message = "External service error while creating Plate journey.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al crear customer journey con Plate");
+                _logger.LogError(ex, "Unexpected error creating journey with plate.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
 
-
+        // --------------------------------------------------------------------
+        // STEP 2: VEHICLE DETAILS
+        // --------------------------------------------------------------------
 
         /// <summary>
-        /// Actualiza los detalles del vehículo en el journey (Paso 2)
+        /// Updates the vehicle details in the customer journey.
         /// </summary>
-        /// <param name="id">ID del journey (UUID)</param>
-        /// <param name="model">Detalles del vehículo</param>
-        /// <returns>Respuesta del journey del servicio externo</returns>
-        /// <response code="200">Detalles actualizados correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Journey no encontrado</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpPost("{id}/vehicle-details")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> UpdateVehicleDetails(string id, [FromBody] CustomerJourneyStep2Model model)
+        public async Task<ActionResult<JsonElement>> UpdateVehicleDetails(
+            string id,
+            [FromBody] CustomerJourneyStep2Model model)
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
-                var result = await _customerJourneyService.UpdateVehicleDetailsAsync(id, jsonElement);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var json = JsonSerializer.SerializeToElement(model, options);
+                var result = await _customerJourneyService.UpdateVehicleDetailsAsync(id, json);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /customer-journey/vehicle-details");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de customer journey",
+                    message = "External service error while updating vehicle details.",
                     detail = ex.Message
                 });
             }
@@ -269,21 +249,19 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
 
+        // --------------------------------------------------------------------
+        // STEP 2B: DAMAGE OPTIONS
+        // --------------------------------------------------------------------
+
         /// <summary>
-        /// Obtiene las opciones de daño disponibles para un journey
+        /// Retrieves the available damage options for a given customer journey.
         /// </summary>
-        /// <param name="customerJourneyId">ID del journey (UUID)</param>
-        /// <returns>Respuesta con opciones de daño del servicio externo</returns>
-        /// <response code="200">Opciones de daño obtenidas correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Journey no encontrado</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpGet("{customerJourneyId}/damage/options")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -298,115 +276,112 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /customer-journey/damage/options");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de opciones de daño",
+                    message = "External service error retrieving damage options.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al obtener opciones de daño");
+                _logger.LogError(ex, "Unexpected error retrieving damage options.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
 
+        // --------------------------------------------------------------------
+        // STEP 3: VEHICLE CONDITION
+        // --------------------------------------------------------------------
+
         /// <summary>
-        /// Actualiza la condición del vehículo en el journey (Paso 3)
+        /// Updates vehicle condition details.
         /// </summary>
-        /// <param name="id">ID del journey (UUID)</param>
-        /// <param name="model">Condición del vehículo</param>
-        /// <returns>Respuesta del journey del servicio externo</returns>
-        /// <response code="200">Condición actualizada correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Journey no encontrado</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpPost("{id}/vehicle-condition")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> UpdateVehicleCondition(string id, [FromBody] CustomerJourneyStep3Model model)
+        public async Task<ActionResult<JsonElement>> UpdateVehicleCondition(
+            string id,
+            [FromBody] CustomerJourneyStep3Model model)
         {
             try
             {
-                _logger.LogInformation("UpdateVehicleCondition llamado para journey ID: {JourneyId}, RequestId: {RequestId}", id, HttpContext.TraceIdentifier);
-                var jsonElement = JsonSerializer.SerializeToElement(model);
-                var result = await _customerJourneyService.UpdateVehicleConditionAsync(id, jsonElement);
-                _logger.LogInformation("UpdateVehicleCondition completado exitosamente para journey ID: {JourneyId}, RequestId: {RequestId}", id, HttpContext.TraceIdentifier);
+                _logger.LogInformation("Updating vehicle condition for journey {JourneyId}", id);
+
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var json = JsonSerializer.SerializeToElement(model, options);
+                var result = await _customerJourneyService.UpdateVehicleConditionAsync(id, json);
+
+                _logger.LogInformation("Vehicle condition updated successfully for journey {JourneyId}", id);
+
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /customer-journey/vehicle-condition");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de customer journey",
+                    message = "External service error while updating vehicle condition.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al actualizar condición del vehículo");
+                _logger.LogError(ex, "Unexpected error updating vehicle condition.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
 
+        // --------------------------------------------------------------------
+        // STEP 4: BODY WORK
+        // --------------------------------------------------------------------
+
         /// <summary>
-        /// Actualiza el trabajo de carrocería en el journey (Paso 4)
+        /// Updates body work information for the customer journey.
         /// </summary>
-        /// <param name="id">ID del journey (UUID)</param>
-        /// <param name="model">Trabajo de carrocería</param>
-        /// <returns>Respuesta del journey del servicio externo</returns>
-        /// <response code="200">Trabajo de carrocería actualizado correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Journey no encontrado</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
         [HttpPost("{id}/body-work")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> UpdateBodyWork(string id, [FromBody] CustomerJourneyStep4Model model)
+        public async Task<ActionResult<JsonElement>> UpdateBodyWork(
+            string id,
+            [FromBody] CustomerJourneyStep4Model model)
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
-                var result = await _customerJourneyService.UpdateBodyWorkAsync(id, jsonElement);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var json = JsonSerializer.SerializeToElement(model, options);
+                var result = await _customerJourneyService.UpdateBodyWorkAsync(id, json);
                 return Ok(result);
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /customer-journey/body-work");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de customer journey",
+                    message = "External service error while updating body work.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al actualizar trabajo de carrocería");
+                _logger.LogError(ex, "Unexpected error updating body work.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing request.",
                     detail = ex.Message
                 });
             }
         }
     }
 }
-

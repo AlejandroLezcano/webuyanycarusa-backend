@@ -3,15 +3,15 @@ using System.Text.Json;
 namespace UyanycarusaService.Services
 {
     /// <summary>
-    /// Interfaz para el servicio de Scheduling (OTP)
+    /// Interface for Scheduling service (OTP)
     /// </summary>
     public interface ISchedulingService
     {
         /// <summary>
-        /// Solicita un código OTP para programación
+        /// Requests an OTP code for scheduling
         /// </summary>
-        /// <param name="model">Datos de la solicitud OTP</param>
-        /// <returns>Respuesta de solicitud OTP como JSON</returns>
+        /// <param name="model">OTP request data</param>
+        /// <returns>OTP request response as JSON</returns>
         Task<JsonElement> RequestOTPAsync(JsonElement model);
     }
 }

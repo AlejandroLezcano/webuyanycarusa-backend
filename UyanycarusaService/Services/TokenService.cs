@@ -48,18 +48,18 @@ namespace UyanycarusaService.Services
                     return cachedTokenAfterLock;
                 }
 
-                _logger.LogInformation("Obteniendo nuevo token de Azure AD (cache vacío)");
+                _logger.LogInformation("Getting new Azure AD token (empty cache)");
                 var tokenResponse = await _authService.GetTokenAsync();
 
-                // Extraer el token y el tiempo de expiración
+                // Extract token and expiration time
                 var accessToken = tokenResponse.GetProperty("access_token").GetString();
                 var expiresIn = tokenResponse.TryGetProperty("expires_in", out var expiresInProp)
                     ? expiresInProp.GetInt32()
-                    : 3600; // Default: 1 hora si no viene expires_in
+                    : 3600; // Default: 1 hour if expires_in is not provided
 
                 if (string.IsNullOrEmpty(accessToken))
                 {
-                    throw new InvalidOperationException("El token de acceso recibido está vacío");
+                    throw new InvalidOperationException("Received access token is empty");
                 }
 
                 var cacheExpiration = TimeSpan.FromSeconds(expiresIn - 300);

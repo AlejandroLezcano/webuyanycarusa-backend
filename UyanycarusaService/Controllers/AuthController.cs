@@ -9,7 +9,7 @@ using System.Text;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para autenticación y generación de tokens JWT
+    /// Controller responsible for authentication and JWT token generation.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
@@ -27,64 +27,68 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Autentica un usuario y genera un token JWT
+        /// Authenticates a user and generates a signed JWT token.
         /// </summary>
-        /// <param name="request">Credenciales de autenticación</param>
-        /// <returns>Token JWT y fecha de expiración</returns>
-        /// <response code="200">Autenticación exitosa. Retorna el token JWT</response>
-        /// <response code="400">Solicitud inválida. Las credenciales son incorrectas</response>
-        /// <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-        /// <remarks>
-        /// Ejemplo de solicitud:
-        ///
-        ///     POST /api/v1/auth/login
-        ///     {
-        ///         "username": "admin",
-        ///         "password": "password123"
-        ///     }
-        ///
-        /// **Nota:** En un entorno de producción, las credenciales deben validarse contra una base de datos o servicio de autenticación.
-        /// Este es un ejemplo simplificado que acepta cualquier credencial.
-        /// </remarks>
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+            if (string.IsNullOrWhiteSpace(request.Username) ||
+                string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest(new { message = "Username y Password son requeridos" });
+                return BadRequest(new { message = "Username and password are required." });
             }
 
-            // En producción, validar contra base de datos o servicio de autenticación
-            // Por ahora, aceptamos cualquier credencial para demostración
-            // TODO: Implementar validación real de credenciales
+            // Load allowed credentials from configuration
+            var envUser = _configuration["Auth:Username"];
+            var envPass = _configuration["Auth:Password"];
 
+            if (envUser == null || envPass == null)
+            {
+                _logger.LogError("Auth credentials not configured in appsettings.");
+                return StatusCode(500, new { message = "Authentication not configured." });
+            }
+
+            // Validate credentials
+            if (request.Username != envUser || request.Password != envPass)
+            {
+                _logger.LogWarning("Invalid login attempt for user: {User}", request.Username);
+                return BadRequest(new { message = "Invalid username or password." });
+            }
+
+            // JWT configuration
             var jwtSettings = _configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
-            var issuer = jwtSettings["Issuer"] ?? "UyanycarusaService";
-            var audience = jwtSettings["Audience"] ?? "UyanycarusaServiceUsers";
+            var secretKey = jwtSettings["SecretKey"];
+            if (string.IsNullOrEmpty(secretKey))
+            {
+                    throw new InvalidOperationException("JWT SecretKey is missing");
+            }
+            var issuer = jwtSettings["Issuer"];
+            var audience = jwtSettings["Audience"];
             var expirationMinutes = int.Parse(jwtSettings["ExpirationInMinutes"] ?? "60");
 
-            var claims = new[]
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var expires = DateTime.UtcNow.AddMinutes(expirationMinutes);
+            var expiresInSeconds = expirationMinutes * 60;
+
+            // Claims
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, request.Username),
-                new Claim(ClaimTypes.NameIdentifier, request.Username),
                 new Claim(JwtRegisteredClaimNames.Sub, request.Username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(expirationMinutes);
-
+            // Build JWT
             var token = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
                 expires: expires,
-                signingCredentials: creds
+                signingCredentials: credentials
             );
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
@@ -92,9 +96,9 @@ namespace UyanycarusaService.Controllers
             return Ok(new LoginResponse
             {
                 Token = tokenString,
-                ExpiresAt = expires
+                ExpiresAt = expires,
+                ExpiresIn = expiresInSeconds
             });
         }
     }
 }
-

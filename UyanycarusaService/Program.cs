@@ -1,4 +1,3 @@
-
 using UyanycarusaService.Middlewares;
 using UyanycarusaService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,16 +11,22 @@ using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Force URLs for dev mode
+builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:5001");
+
+// ALWAYS lowercase URLs
+builder.Services.AddRouting(o => o.LowercaseUrls = true);
+
+// Controllers
 builder.Services.AddControllers();
 
 // API Versioning
-builder.Services.AddApiVersioning(options =>
+builder.Services.AddApiVersioning(o =>
 {
-    options.DefaultApiVersion = new ApiVersion(1, 0);
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.ReportApiVersions = true;
-    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    o.DefaultApiVersion = new ApiVersion(1, 0);
+    o.AssumeDefaultVersionWhenUnspecified = true;
+    o.ReportApiVersions = true;
+    o.ApiVersionReader = new UrlSegmentApiVersionReader();
 });
 
 // Rate Limiting
@@ -32,16 +37,16 @@ builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>()
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
+var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey missing");
 
-builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(o =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
+.AddJwtBearer(o =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
+    o.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
@@ -54,46 +59,34 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization(options =>
+builder.Services.AddAuthorization(o =>
 {
-    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+    o.DefaultPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
 });
 
-// Swagger with JWT support
+// Swagger + JWT fix
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
         Title = "WeBuyAnyCar USA API",
-        Description = "API para consultar información de vehículos desde WeBuyAnyCar USA.",
-        Contact = new OpenApiContact
-        {
-            Name = "WeBuyAnyCar USA Team",
-            Email = "support@webuyanycarusa.com"
-        }
+        Description = "API for WBAC USA"
     });
 
-    // Include XML comments
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        options.IncludeXmlComments(xmlPath);
-    }
-
-    // JWT Bearer configuration for Swagger
+    // Correct JWT config
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header usando el esquema Bearer. Ejemplo: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
-        BearerFormat = "JWT"
+        BearerFormat = "JWT",
+        Description = "Enter: Bearer {token}"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -112,25 +105,22 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Health checks
+// Health Checks
 builder.Services.AddHealthChecks();
 
-// CORS Configuration
-builder.Services.AddCors(options =>
+// CORS
+builder.Services.AddCors(o =>
 {
-    options.AddPolicy("AllowLocalhost", policy =>
+    o.AddPolicy("AllowLocalhost", p =>
     {
-        // Lista completa de orígenes comunes de localhost para desarrollo
-        var localhostOrigins = new[]
-        {
+        p.WithOrigins(
             "http://localhost:3000", "https://localhost:3000",
-            "http://localhost:3001", "https://localhost:3001",
-        };
-
-        policy.WithOrigins(localhostOrigins)
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+            "http://127.0.0.1:3000"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithExposedHeaders("Authorization");
     });
 });
 
@@ -148,73 +138,53 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
 
-// HttpClient configuration for external APIs
-var webuyAnyCarBaseUrl = builder.Configuration["ExternalApis:WebuyAnyCarBaseUrl"]
+// HttpClient
+var webuyBaseUrl = builder.Configuration["ExternalApis:WebuyAnyCarBaseUrl"]
     ?? "https://www.webuyanycarusa.com/api";
 
-builder.Services.AddHttpClient("WebuyAnyCarApi", client =>
+builder.Services.AddHttpClient("WebuyAnyCarApi", c =>
 {
-    client.BaseAddress = new Uri(webuyAnyCarBaseUrl);
-    client.Timeout = TimeSpan.FromSeconds(30);
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
-    client.DefaultRequestHeaders.Add("User-Agent", "UyanycarusaService/1.0");
+    c.BaseAddress = new Uri(webuyBaseUrl);
+    c.Timeout = TimeSpan.FromSeconds(30);
+    c.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
+// Build
 var app = builder.Build();
 
-// HTTPS Enforcement
-// En Development: HTTPS es recomendado pero no forzado
-// En Production: HTTPS es obligatorio
-if (app.Environment.IsDevelopment())
+// HTTPS
+if (!app.Environment.IsDevelopment())
 {
-    app.UseHttpsRedirection(); // Redirige a HTTPS pero no bloquea HTTP
-}
-else
-{
-    // En producción, forzar HTTPS
     app.UseHttpsRedirection();
-    app.Use(async (context, next) =>
-    {
-        if (!context.Request.IsHttps)
-        {
-            context.Response.StatusCode = 403;
-            await context.Response.WriteAsync("HTTPS is required.");
-            return;
-        }
-        await next();
-    });
 }
 
-// CORS Middleware (must be before other middlewares)
+// CORS BEFORE AUTH
 app.UseCors("AllowLocalhost");
 
-// Rate Limiting Middleware (must be before other middlewares)
+// Rate limiting
 app.UseIpRateLimiting();
 
 // Middlewares
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-// Authentication & Authorization
+// Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    app.UseSwaggerUI(o =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "WeBuyAnyCar USA API v1");
-        options.RoutePrefix = "swagger";
-        options.DisplayRequestDuration();
+        o.RoutePrefix = "swagger";
+        o.SwaggerEndpoint("/swagger/v1/swagger.json", "WBAC API v1");
     });
 }
 
 app.MapControllers();
-
-// Liveness/Health
 app.MapHealthChecks("/health");
 
 app.Run();
 
-// For integration testing
 public partial class Program { }
