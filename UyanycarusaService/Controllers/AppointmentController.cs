@@ -7,6 +7,7 @@ using UyanycarusaService.Dtos;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
+    /// Controller for appointment operations
     /// Controller for all appointment operations.
     /// Requires a valid JWT for every request.
     /// </summary>
@@ -36,6 +37,9 @@ namespace UyanycarusaService.Controllers
         /// <param name="zipCode">ZIP code (5 digits)</param>
         /// <param name="customerVehicleId">Customer vehicle record ID</param>
         /// <returns>Availability response from external scheduling service</returns>
+        /// <response code="200">Availability retrieved successfully.</response>
+        /// <response code="401">Unauthorized. Valid JWT token required.</response>
+        /// <response code="500">Error consuming external service.</response>
         [HttpGet("availability/{zipCode}/{customerVehicleId}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

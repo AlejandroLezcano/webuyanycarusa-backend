@@ -6,65 +6,12 @@
     <members>
         <member name="T:UyanycarusaService.Controllers.AppointmentController">
             <summary>
-<<<<<<< HEAD
-            Controller for appointment operations
-=======
             Controller for all appointment operations.
             Requires a valid JWT for every request.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.AppointmentController.GetAvailability(System.String,System.Int32)">
             <summary>
-<<<<<<< HEAD
-            Gets appointment availability for a specific zip code and vehicle
-            </summary>
-            <param name="zipCode">Zip code (5 digits)</param>
-            <param name="customerVehicleId">Customer vehicle ID</param>
-            <returns>Availability response from external service</returns>
-            <response code="200">Availability retrieved successfully</response>
-            <response code="401">Unauthorized. Valid JWT token required</response>
-            <response code="500">Error consuming external service</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.AppointmentController.BookAppointment(UyanycarusaService.Dtos.AppointmentBookingModel)">
-            <summary>
-            Reserva una cita para un vehículo
-            </summary>
-            <param name="model">Datos de la reserva de cita</param>
-            <returns>Respuesta de reserva del servicio externo</returns>
-            <response code="200">Cita reservada correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.AppointmentController.RescheduleAppointment(System.Int32,UyanycarusaService.Dtos.AppointmentBookingModel)">
-            <summary>
-            Reprograma una cita existente
-            </summary>
-            <param name="existingAppointmentId">ID de la cita existente</param>
-            <param name="model">Datos de la nueva reserva de cita</param>
-            <returns>Respuesta de reprogramación del servicio externo</returns>
-            <response code="200">Cita reprogramada correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.AppointmentController.CancelAppointment(System.Int32,System.Int64)">
-            <summary>
-            Cancela una cita existente
-            </summary>
-            <param name="customerVehicleId">ID del vehículo del cliente</param>
-            <param name="phoneNumber">Número de teléfono del cliente</param>
-            <returns>Respuesta de cancelación del servicio externo</returns>
-            <response code="200">Cita cancelada correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Cita no encontrada</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.AttributionController">
-            <summary>
-            Controlador para operaciones de atribución
-=======
             Retrieves appointment availability for a specific ZIP code and customer vehicle ID.
             </summary>
             <param name="zipCode">ZIP code (5 digits)</param>
@@ -103,65 +50,10 @@
             <summary>
             Controller responsible for attribution-related operations.
             All endpoints require a valid JWT.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.AttributionController.CreateOrGetVisitor(System.Nullable{System.Int64})">
             <summary>
-<<<<<<< HEAD
-            Crea o obtiene un visitor
-            </summary>
-            <param name="oldVisitorId">ID del visitor anterior opcional (para migración)</param>
-            <returns>Respuesta con información del visitor del servicio externo</returns>
-            <response code="200">Visitor obtenido correctamente</response>
-            <response code="201">Visitor creado correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.AttributionController.CreateVisit(System.Int64,UyanycarusaService.Dtos.VisitRequestModel)">
-            <summary>
-            Registra una visita para un visitor
-            </summary>
-            <param name="visitorId">ID del visitor</param>
-            <param name="model">Datos de la visita</param>
-            <returns>Respuesta con información de la visita del servicio externo</returns>
-            <response code="201">Visita registrada correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Visitor no encontrado</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.AuthController">
-            <summary>
-            Controller for authentication and JWT token generation
-            </summary>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.AuthController.Login(UyanycarusaService.Dtos.LoginRequest)">
-             <summary>
-             Authenticates a user and generates a JWT token
-             </summary>
-             <param name="request">Authentication credentials</param>
-             <returns>JWT token and expiration date</returns>
-             <response code="200">Successful authentication. Returns the JWT token</response>
-             <response code="400">Invalid request. Credentials are incorrect</response>
-             <response code="429">Too many requests. Rate limit exceeded</response>
-             <remarks>
-             Request example:
-            
-                 POST /api/v1/auth/login
-                 {
-                     "username": "admin",
-                     "password": "password123"
-                 }
-            
-             **Note:** In a production environment, credentials should be validated against a database or authentication service.
-             This is a simplified example that accepts any credentials.
-             </remarks>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.BranchContentController">
-            <summary>
-            Controlador para operaciones de contenido de sucursales
-=======
             Creates or retrieves a visitor record.
             </summary>
             <param name="oldVisitorId">Optional previous visitor ID used for migration fallback</param>
@@ -197,39 +89,10 @@
         <member name="T:UyanycarusaService.Controllers.BranchContentController">
             <summary>
             Controller for branch content operations.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.BranchContentController.GetBranches(System.String,System.Nullable{System.Int32},System.String)">
             <summary>
-<<<<<<< HEAD
-            Obtiene la lista de sucursales disponibles
-            </summary>
-            <param name="zipCode">Código postal opcional (5 dígitos)</param>
-            <param name="limit">Límite de resultados opcional</param>
-            <param name="branchType">Tipo de sucursal opcional (Physical, Mobile, All)</param>
-            <returns>Respuesta con lista de sucursales del servicio externo</returns>
-            <response code="200">Lista de sucursales obtenida correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.BranchContentController.GetBranchDetail(System.Int32)">
-            <summary>
-            Obtiene el detalle de una sucursal específica
-            </summary>
-            <param name="branchId">ID de la sucursal</param>
-            <returns>Respuesta con detalle de la sucursal del servicio externo</returns>
-            <response code="200">Detalle de sucursal obtenido correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Sucursal no encontrada</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.ContentController">
-            <summary>
-            Controlador para operaciones de contenido
-=======
             Gets the list of available branches.
             </summary>
             <param name="zipCode">Optional ZIP code (5 digits)</param>
@@ -257,54 +120,10 @@
             <summary>
             Controller for dynamic website content (FAQs, landing pages, etc.).
             All endpoints require a valid JWT token.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.ContentController.GetFaqs">
             <summary>
-<<<<<<< HEAD
-            Obtiene la lista de categorías de FAQs
-            </summary>
-            <returns>Respuesta con lista de categorías de FAQs del servicio externo</returns>
-            <response code="200">Lista de FAQs obtenida correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.ContentController.GetFaqsBySlug(System.String)">
-            <summary>
-            Obtiene el detalle de FAQs por slug
-            </summary>
-            <param name="slug">Slug de la categoría de FAQ</param>
-            <returns>Respuesta con FAQs detalladas del servicio externo</returns>
-            <response code="200">FAQs obtenidas correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">FAQ no encontrada</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.ContentController.GetLandingPages">
-            <summary>
-            Obtiene la lista de páginas de landing disponibles
-            </summary>
-            <returns>Respuesta con lista de páginas de landing del servicio externo</returns>
-            <response code="200">Lista de landing pages obtenida correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.ContentController.GetLandingPageBySlug(System.String)">
-            <summary>
-            Obtiene el contenido de una página de landing por slug
-            </summary>
-            <param name="slug">Slug de la página de landing</param>
-            <returns>Respuesta con contenido de la página de landing del servicio externo</returns>
-            <response code="200">Landing page obtenida correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Landing page no encontrada</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.CustomerJourneyController">
-            <summary>
-            Controller for customer journey operations
-=======
             Retrieves a list of FAQ categories.
             </summary>
         </member>
@@ -327,119 +146,10 @@
             <summary>
             Controller for all Customer Journey operations.
             All endpoints require a valid JWT token.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetJourneyById(System.Guid)">
             <summary>
-<<<<<<< HEAD
-            Gets a customer journey by its ID (UUID)
-            </summary>
-            <param name="id">Journey ID (UUID)</param>
-            <returns>Journey response from external service</returns>
-            <response code="200">Journey retrieved successfully</response>
-            <response code="401">Unauthorized. Valid JWT token required</response>
-            <response code="404">Journey not found</response>
-            <response code="500">Error consuming external service</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetJourneyByVisitId(System.Int32)">
-            <summary>
-            Gets a customer journey by visitId (integer)
-            </summary>
-            <param name="visitId">ID de la visita (integer)</param>
-            <returns>Respuesta del journey del servicio externo</returns>
-            <response code="200">Journey obtenido correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Journey no encontrado</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithYMM(UyanycarusaService.Dtos.CustomerJourneyStep1YMMModel)">
-            <summary>
-            Inicia un customer journey usando Year, Make, Model
-            </summary>
-            <param name="model">Datos del vehículo (YMM)</param>
-            <returns>Respuesta del journey del servicio externo</returns>
-            <response code="200">Journey creado correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithVIN(UyanycarusaService.Dtos.CustomerJourneyStep1VINModel)">
-            <summary>
-            Inicia un customer journey usando VIN
-            </summary>
-            <param name="model">Datos del vehículo (VIN)</param>
-            <returns>Respuesta del journey del servicio externo</returns>
-            <response code="200">Journey creado correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithPlate(UyanycarusaService.Dtos.CustomerJourneyStep1PlateModel)">
-            <summary>
-            Inicia un customer journey usando License Plate
-            </summary>
-            <param name="model">Datos del vehículo (Plate)</param>
-            <returns>Respuesta del journey del servicio externo</returns>
-            <response code="200">Journey creado correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateVehicleDetails(System.String,UyanycarusaService.Dtos.CustomerJourneyStep2Model)">
-            <summary>
-            Actualiza los detalles del vehículo en el journey (Paso 2)
-            </summary>
-            <param name="id">ID del journey (UUID)</param>
-            <param name="model">Detalles del vehículo</param>
-            <returns>Respuesta del journey del servicio externo</returns>
-            <response code="200">Detalles actualizados correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Journey no encontrado</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetDamageOptions(System.String)">
-            <summary>
-            Obtiene las opciones de daño disponibles para un journey
-            </summary>
-            <param name="customerJourneyId">ID del journey (UUID)</param>
-            <returns>Respuesta con opciones de daño del servicio externo</returns>
-            <response code="200">Opciones de daño obtenidas correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Journey no encontrado</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateVehicleCondition(System.String,UyanycarusaService.Dtos.CustomerJourneyStep3Model)">
-            <summary>
-            Actualiza la condición del vehículo en el journey (Paso 3)
-            </summary>
-            <param name="id">ID del journey (UUID)</param>
-            <param name="model">Condición del vehículo</param>
-            <returns>Respuesta del journey del servicio externo</returns>
-            <response code="200">Condición actualizada correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Journey no encontrado</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateBodyWork(System.String,UyanycarusaService.Dtos.CustomerJourneyStep4Model)">
-            <summary>
-            Actualiza el trabajo de carrocería en el journey (Paso 4)
-            </summary>
-            <param name="id">ID del journey (UUID)</param>
-            <param name="model">Trabajo de carrocería</param>
-            <returns>Respuesta del journey del servicio externo</returns>
-            <response code="200">Trabajo de carrocería actualizado correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Journey no encontrado</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.MakeModelContentController">
-            <summary>
-            Controlador para operaciones de contenido de marca y modelo
-=======
             Retrieves a customer journey by its UUID.
             </summary>
         </member>
@@ -487,37 +197,10 @@
             <summary>
             Controller for make/model content operations.
             All endpoints require a valid JWT token.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.MakeModelContentController.GetMakeContent(System.String)">
             <summary>
-<<<<<<< HEAD
-            Obtiene el contenido de una marca específica
-            </summary>
-            <param name="make">Nombre de la marca</param>
-            <returns>Respuesta con contenido de la marca del servicio externo</returns>
-            <response code="200">Contenido de marca obtenido correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Marca no encontrada</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.MakeModelContentController.GetMakeModelContent(System.String,System.String)">
-            <summary>
-            Obtiene el contenido de una marca y modelo específicos
-            </summary>
-            <param name="make">Nombre de la marca</param>
-            <param name="model">Nombre del modelo</param>
-            <returns>Respuesta con contenido de la marca y modelo del servicio externo</returns>
-            <response code="200">Contenido de marca y modelo obtenido correctamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="404">Marca o modelo no encontrado</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.SchedulingController">
-            <summary>
-            Controlador para operaciones de Scheduling (OTP)
-=======
             Retrieves content for a specific vehicle make.
             </summary>
             <param name="make">Vehicle make name.</param>
@@ -543,27 +226,10 @@
             <summary>
             Controller for Scheduling (OTP) operations.
             All endpoints require a valid JWT token.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.SchedulingController.RequestOTP(UyanycarusaService.Dtos.ScheduleOTPRequest)">
             <summary>
-<<<<<<< HEAD
-            Requests an OTP code for scheduling
-            </summary>
-            <param name="model">OTP request data</param>
-            <returns>OTP request response from external service</returns>
-            <response code="202">OTP request accepted</response>
-            <response code="400">Invalid request for external service</response>
-            <response code="401">Unauthorized. Valid JWT token required</response>
-            <response code="404">Recurso no encontrado</response>
-            <response code="429">Demasiadas solicitudes</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.SmsController">
-            <summary>
-            Controlador para operaciones relacionadas con SMS
-=======
             Requests an OTP code for scheduling.
             </summary>
             <param name="model">OTP request payload.</param>
@@ -579,26 +245,10 @@
             <summary>
             Controller for SMS operations.
             All endpoints require a valid JWT token.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.SmsController.SendSms(UyanycarusaService.Dtos.SmsSendModel)">
             <summary>
-<<<<<<< HEAD
-            Envía un SMS a través del servicio externo
-            </summary>
-            <param name="request">Datos del SMS a enviar (customerVehicleId, recipient, message)</param>
-            <returns>Respuesta del servicio externo</returns>
-            <response code="200">SMS enviado exitosamente</response>
-            <response code="400">Solicitud inválida. Los datos del SMS son incorrectos</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-            <response code="500">Error al comunicarse con el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.ValuationController">
-            <summary>
-            Controlador para operaciones de valuación de vehículos
-=======
             Sends an SMS using the external SMS provider.
             </summary>
             <param name="request">SMS request payload (customerVehicleId, recipient, message).</param>
@@ -613,36 +263,10 @@
             <summary>
             Controller for vehicle valuation operations.
             All endpoints require a valid JWT token.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.ValuationController.CreateValuation(UyanycarusaService.Dtos.ValuationModel)">
             <summary>
-<<<<<<< HEAD
-            Realiza una valuación básica del vehículo
-            </summary>
-            <param name="model">Payload enviado al endpoint externo /Valuation</param>
-            <returns>Respuesta de valuación del servicio externo</returns>
-            <response code="200">Valuación realizada correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.ValuationController.CreateValuationWithDamage(UyanycarusaService.Dtos.ValuationWithDamageModel)">
-            <summary>
-            Realiza una valuación del vehículo incluyendo daños
-            </summary>
-            <param name="model">Payload enviado al endpoint externo /Valuation/with-damage</param>
-            <returns>Respuesta de valuación del servicio externo</returns>
-            <response code="200">Valuación realizada correctamente</response>
-            <response code="400">Solicitud inválida para el servicio externo</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="T:UyanycarusaService.Controllers.VehiclesController">
-            <summary>
-            Controlador para operaciones relacionadas con vehículos
-=======
             Performs a basic vehicle valuation.
             </summary>
             <param name="model">Payload sent to the external /Valuation endpoint.</param>
@@ -667,70 +291,10 @@
             <summary>
             Controller for all vehicle-related operations.
             Requires valid JWT authentication for all endpoints.
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.VehiclesController.GetYears">
             <summary>
-<<<<<<< HEAD
-            Obtiene la lista de años disponibles de vehículos desde el servicio externo
-            </summary>
-            <returns>Lista de años disponibles (enteros)</returns>
-            <response code="200">Retorna la lista de años exitosamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetMakes(System.Int32)">
-            <summary>
-            Obtiene la lista de marcas disponibles para un año específico desde el servicio externo
-            </summary>
-            <param name="year">Año del vehículo</param>
-            <returns>Lista de marcas disponibles (strings)</returns>
-            <response code="200">Retorna la lista de marcas exitosamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetModels(System.Int32,System.String)">
-            <summary>
-            Obtiene la lista de modelos disponibles para un año y marca específicos desde el servicio externo
-            </summary>
-            <param name="year">Año del vehículo</param>
-            <param name="make">Marca del vehículo</param>
-            <returns>Lista de modelos disponibles (strings)</returns>
-            <response code="200">Retorna la lista de modelos exitosamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetTrims(System.Int32,System.String,System.String)">
-            <summary>
-            Obtiene la lista de trims (versiones/equipamientos) disponibles para un año, marca y modelo específicos desde el servicio externo
-            </summary>
-            <param name="year">Año del vehículo</param>
-            <param name="make">Marca del vehículo</param>
-            <param name="model">Modelo del vehículo</param>
-            <returns>Lista de trims disponibles (array de objetos con bodystyle, series, imageUrl)</returns>
-            <response code="200">Retorna la lista de trims exitosamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-            <response code="500">Error al consumir el servicio externo</response>
-        </member>
-        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetImage(System.String)">
-            <summary>
-            Obtiene una imagen desde una URL externa
-            </summary>
-            <param name="url">URL de la imagen a obtener</param>
-            <returns>Archivo de imagen</returns>
-            <response code="200">Retorna la imagen exitosamente</response>
-            <response code="401">No autorizado. Se requiere un token JWT válido</response>
-            <response code="500">Error al obtener la imagen desde la URL</response>
-        </member>
-        <member name="T:UyanycarusaService.Dtos.AppointmentBookingModel">
-            <summary>
-            Model for booking an appointment
-=======
             Retrieves the available vehicle years from the external service.
             </summary>
             <returns>List of available years.</returns>
@@ -839,7 +403,6 @@
         <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.OtpCode">
             <summary>
             OTP code used for appointment validation (optional).
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="T:UyanycarusaService.Dtos.CustomerJourneyStep1PlateModel">
@@ -909,14 +472,11 @@
             Token expiration date
             </summary>
         </member>
-<<<<<<< HEAD
-=======
         <member name="P:UyanycarusaService.Dtos.LoginResponse.ExpiresIn">
             <summary>
             Token expiration in seconds
             </summary>
         </member>
->>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
         <member name="T:UyanycarusaService.Dtos.ScheduleOTPRequest">
             <summary>
             Model for requesting an OTP code

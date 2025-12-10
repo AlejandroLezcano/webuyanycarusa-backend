@@ -120,7 +120,7 @@ UyanycarusaService/appsettings.json
 1. Open the project in Visual Studio 2022
 2. Select the `UyanycarusaService` profile in the toolbar
 3. Press `F5` or click the "Run" button
-4. The browser will automatically open at `http://localhost:5000/swagger`
+4. The browser will automatically open at `http://localhost:5001/swagger`
 
 ### Option 2: Run from Terminal/CMD
 
@@ -136,14 +136,14 @@ dotnet run
 
 3. The server will start and you'll see a message similar to:
 ```
-Now listening on: http://localhost:5000
+Now listening on: http://localhost:5001
 ```
 
 4. Open your browser and navigate to:
-   - **Swagger UI**: `http://localhost:5000/swagger`
-   - **Health Check**: `http://localhost:5000/health`
-
-### Option 3: Run with Docker
+   - **Swagger UI**: `http://localhost:5001/swagger`
+   - **Health Check**: `http://localhost:5001/health`
+Now listening on: http://localhost:5000
+```
 
 1. From the backend project root (`we-buy-any-car-back`), build the image:
 ```bash
@@ -163,7 +163,11 @@ Most endpoints require JWT authentication. To obtain a token:
 
 1. **Get JWT Token:**
    ```bash
+<<<<<<< HEAD
+   POST http://localhost:5001/api/v1/auth/login
+=======
    POST http://localhost:5000/api/v1/auth/login
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
    Content-Type: application/json
    
    {

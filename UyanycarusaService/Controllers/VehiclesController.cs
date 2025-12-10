@@ -12,6 +12,7 @@ namespace UyanycarusaService.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/[controller]")]
+    // OJO: sin [Authorize] aquí → todo el controller es público
     [AllowAnonymous]
     public class VehiclesController : ControllerBase
     {
@@ -29,8 +30,8 @@ namespace UyanycarusaService.Controllers
         /// </summary>
         /// <returns>List of available years.</returns>
         [HttpGet("years")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<List<int>>> GetYears()
@@ -64,8 +65,8 @@ namespace UyanycarusaService.Controllers
         /// <param name="year">Vehicle year.</param>
         /// <returns>List of available makes.</returns>
         [HttpGet("makes/{year}")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<List<string>>> GetMakes(int year)
@@ -100,8 +101,8 @@ namespace UyanycarusaService.Controllers
         /// <param name="make">Vehicle make.</param>
         /// <returns>List of available models.</returns>
         [HttpGet("models/{year}/{make}")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<List<string>>> GetModels(int year, string make)
@@ -137,8 +138,8 @@ namespace UyanycarusaService.Controllers
         /// <param name="model">Vehicle model (query parameter to handle special characters).</param>
         /// <returns>Trim list (body style, series, images).</returns>
         [HttpGet("trims/{year}/{make}")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<JsonElement>> GetTrims(int year, string make, [FromQuery] string model)
@@ -172,6 +173,7 @@ namespace UyanycarusaService.Controllers
         /// <param name="url">External image URL.</param>
         /// <returns>Binary image stream.</returns>
         [HttpGet("image")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -186,7 +188,6 @@ namespace UyanycarusaService.Controllers
                 }
 
                 var (imageBytes, contentType) = await _vehiclesService.GetImageAsync(url);
-
                 var stream = new MemoryStream(imageBytes);
 
                 return new FileStreamResult(stream, contentType)

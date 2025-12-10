@@ -48,7 +48,8 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, jsonOptions);
                 var result = await _schedulingService.RequestOTPAsync(jsonElement);
 
                 return StatusCode(202, result);

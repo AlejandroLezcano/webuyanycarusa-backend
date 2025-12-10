@@ -80,8 +80,6 @@ namespace UyanycarusaService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error sending SMS.");
-
                 return StatusCode(500, new
                 {
                     message = "Unexpected error processing SMS request.",
@@ -91,3 +89,4 @@ namespace UyanycarusaService.Controllers
         }
     }
 }
+

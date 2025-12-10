@@ -1,18 +1,23 @@
+using System;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
-using UyanycarusaService.Services;
 using UyanycarusaService.Dtos;
+using UyanycarusaService.Services;
 
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
+    /// Controller for customer journey operations
     /// Controller for all Customer Journey operations.
     /// All endpoints require a valid JWT token.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/customer-journey")]
+    // IMPORTANTE: no [Authorize] a nivel de clase
     [AllowAnonymous] // JWT enforced globally for this controller
     [Tags("CustomerJourney")]
     public class CustomerJourneyController : ControllerBase
@@ -36,8 +41,8 @@ namespace UyanycarusaService.Controllers
         /// Retrieves a customer journey by its UUID.
         /// </summary>
         [HttpGet("{id:guid}")]
+        [AllowAnonymous] // público
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<JsonElement>> GetJourneyById(Guid id)
@@ -45,6 +50,12 @@ namespace UyanycarusaService.Controllers
             try
             {
                 var result = await _customerJourneyService.GetJourneyByIdAsync(id.ToString());
+                if (result.ValueKind == JsonValueKind.Undefined ||
+                    result.ValueKind == JsonValueKind.Null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(result);
             }
             catch (HttpRequestException ex)
@@ -66,11 +77,13 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
+        /// Gets a customer journey by visitId (integer)
+        /// GET /api/customer-journey/{visitId:int}
         /// Retrieves a customer journey by visitId (integer).
         /// </summary>
         [HttpGet("{visitId:int}")]
+        [AllowAnonymous] // público (lo que llama tu front: /api/customer-journey/260141965)
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<JsonElement>> GetJourneyByVisitId(int visitId)
@@ -78,6 +91,12 @@ namespace UyanycarusaService.Controllers
             try
             {
                 var result = await _customerJourneyService.GetJourneyByVisitIdAsync(visitId);
+                if (result.ValueKind == JsonValueKind.Undefined ||
+                    result.ValueKind == JsonValueKind.Null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(result);
             }
             catch (HttpRequestException ex)
@@ -106,6 +125,7 @@ namespace UyanycarusaService.Controllers
         /// Starts a customer journey using Year/Make/Model.
         /// </summary>
         [HttpPost]
+        [Authorize] // protegido
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -143,6 +163,7 @@ namespace UyanycarusaService.Controllers
         /// Starts a customer journey using a VIN.
         /// </summary>
         [HttpPost("vin")]
+        [Authorize]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -180,6 +201,7 @@ namespace UyanycarusaService.Controllers
         /// Starts a customer journey using a license plate.
         /// </summary>
         [HttpPost("plate")]
+        [Authorize]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -221,6 +243,7 @@ namespace UyanycarusaService.Controllers
         /// Updates the vehicle details in the customer journey.
         /// </summary>
         [HttpPost("{id}/vehicle-details")]
+        [Authorize]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -263,6 +286,7 @@ namespace UyanycarusaService.Controllers
         /// Retrieves the available damage options for a given customer journey.
         /// </summary>
         [HttpGet("{customerJourneyId}/damage/options")]
+        [Authorize]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -301,6 +325,7 @@ namespace UyanycarusaService.Controllers
         /// Updates vehicle condition details.
         /// </summary>
         [HttpPost("{id}/vehicle-condition")]
+        [Authorize]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -349,6 +374,7 @@ namespace UyanycarusaService.Controllers
         /// Updates body work information for the customer journey.
         /// </summary>
         [HttpPost("{id}/body-work")]
+        [Authorize]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

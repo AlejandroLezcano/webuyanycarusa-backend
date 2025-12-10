@@ -9,6 +9,7 @@ using System.Text;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
+    /// Controller for authentication and JWT token generation
     /// Controller responsible for authentication and JWT token generation.
     /// </summary>
     [ApiController]
@@ -29,9 +30,26 @@ namespace UyanycarusaService.Controllers
         /// <summary>
         /// Authenticates a user and generates a signed JWT token.
         /// </summary>
+        /// <param name="request">Authentication credentials.</param>
+        /// <returns>JWT token and expiration date.</returns>
+        /// <response code="200">Successful authentication. Returns the JWT token.</response>
+        /// <response code="400">Invalid request. Credentials are incorrect.</response>
+        /// <response code="500">Authentication not configured.</response>
+        /// <remarks>
+        /// Request example:
+        ///
+        ///     POST /api/v1/auth/login
+        ///     {
+        ///         "username": "admin",
+        ///         "password": "password123"
+        ///     }
+        ///
+        /// **Note:** In a production environment, credentials should be validated against a database or authentication service.
+        /// </remarks>
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Login([FromBody] LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Username) ||

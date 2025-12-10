@@ -1,13 +1,14 @@
 using UyanycarusaService.Middlewares;
 using UyanycarusaService.Services;
+using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using AspNetCoreRateLimit;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,7 @@ builder.Services.AddAuthentication(o =>
     };
 });
 
+// Authorization
 builder.Services.AddAuthorization(o =>
 {
     o.DefaultPolicy = new AuthorizationPolicyBuilder()
@@ -75,8 +77,15 @@ builder.Services.AddSwaggerGen(options =>
     {
         Version = "v1",
         Title = "WeBuyAnyCar USA API",
-        Description = "API for WBAC USA"
+        Description = "API para consultar información de vehículos desde WeBuyAnyCar USA."
     });
+
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
 
     // Correct JWT config
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -122,6 +131,22 @@ builder.Services.AddCors(o =>
         .AllowCredentials()
         .WithExposedHeaders("Authorization");
     });
+
+    o.AddPolicy("AllowProduction", policy =>
+    {
+        var productionOrigins = new[]
+        {
+            "https://sellyourcarrnow.com",
+            "https://www.sellyourcarrnow.com",
+            "http://sellyourcarrnow.com",
+            "http://www.sellyourcarrnow.com"
+        };
+
+        policy.WithOrigins(productionOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
 });
 
 // Services
@@ -152,14 +177,28 @@ builder.Services.AddHttpClient("WebuyAnyCarApi", c =>
 // Build
 var app = builder.Build();
 
+// Forwarded headers (for NGINX reverse proxy)
+// No enforce HTTPS aquí, solo para que otros middlewares puedan usarlo si quieren.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
+
+// CORS Middleware
+if (app.Environment.IsProduction())
+{
+    app.UseCors("AllowProduction");
+}
+else
+{
+    app.UseCors("AllowLocalhost");
+}
+
 // HTTPS
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-
-// CORS BEFORE AUTH
-app.UseCors("AllowLocalhost");
 
 // Rate limiting
 app.UseIpRateLimiting();
@@ -179,7 +218,16 @@ app.UseSwaggerUI(o =>
     o.SwaggerEndpoint("/swagger/v1/swagger.json", "WBAC API v1");
 });
 
+// Rutas de test / health públicas
+app.MapGet("/", () => "API OK").AllowAnonymous();
+app.MapGet("/health", () => "HEALTH OK").AllowAnonymous();
+app.MapGet("/testalive", () => "ALIVE").AllowAnonymous();
+
+// Controllers
 app.MapControllers();
+
+// Liveness/Health endpoint formal
+app.MapHealthChecks("/healthz");
 app.MapHealthChecks("/health");
 
 app.Run();
