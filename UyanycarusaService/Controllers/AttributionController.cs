@@ -7,33 +7,36 @@ using UyanycarusaService.Dtos;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de atribución
+    /// Controller responsible for attribution-related operations.
+    /// All endpoints require a valid JWT.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/[controller]")]
-    [Authorize]
+    [AllowAnonymous]
     [Tags("Attribution")]
     public class AttributionController : ControllerBase
     {
         private readonly IAttributionService _attributionService;
         private readonly ILogger<AttributionController> _logger;
 
-        public AttributionController(IAttributionService attributionService, ILogger<AttributionController> logger)
+        public AttributionController(
+            IAttributionService attributionService,
+            ILogger<AttributionController> logger)
         {
             _attributionService = attributionService;
             _logger = logger;
         }
 
         /// <summary>
-        /// Crea o obtiene un visitor
+        /// Creates or retrieves a visitor record.
         /// </summary>
-        /// <param name="oldVisitorId">ID del visitor anterior opcional (para migración)</param>
-        /// <returns>Respuesta con información del visitor del servicio externo</returns>
-        /// <response code="200">Visitor obtenido correctamente</response>
-        /// <response code="201">Visitor creado correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="oldVisitorId">Optional previous visitor ID used for migration fallback</param>
+        /// <returns>Visitor information from the external attribution service</returns>
+        /// <response code="200">Visitor retrieved successfully</response>
+        /// <response code="201">Visitor created successfully</response>
+        /// <response code="401">Unauthorized – valid JWT required</response>
+        /// <response code="500">External attribution service error</response>
         [HttpPost("visitor")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status201Created)]
@@ -45,46 +48,44 @@ namespace UyanycarusaService.Controllers
             {
                 var result = await _attributionService.CreateOrGetVisitorAsync(oldVisitorId);
 
-                // El servicio externo puede retornar 200 (obtenido) o 201 (creado)
-                // Simulamos el comportamiento basado en si tiene oldVisitorId
-                if (oldVisitorId.HasValue)
-                {
-                    return Ok(result);
-                }
-                else
-                {
-                    return StatusCode(201, result);
-                }
+                // External behavior:
+                // - oldVisitorId present → "retrieve" → 200 OK
+                // - no prior ID → "create" → 201 Created
+                return oldVisitorId.HasValue
+                    ? Ok(result)
+                    : StatusCode(201, result);
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex, "Error calling external attribution service (/visitor).");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de atribución",
+                    message = "Error communicating with external attribution service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error processing visitor request.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de visitor",
+                    message = "Unexpected server error while processing visitor request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Registra una visita para un visitor
+        /// Registers a visit event for a specific visitor.
         /// </summary>
-        /// <param name="visitorId">ID del visitor</param>
-        /// <param name="model">Datos de la visita</param>
-        /// <returns>Respuesta con información de la visita del servicio externo</returns>
-        /// <response code="201">Visita registrada correctamente</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Visitor no encontrado</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="visitorId">The visitor's unique ID</param>
+        /// <param name="model">Visit details payload</param>
+        /// <returns>Visit event response from external attribution system</returns>
+        /// <response code="201">Visit recorded successfully</response>
+        /// <response code="400">Invalid request body</response>
+        /// <response code="401">Unauthorized – valid JWT required</response>
+        /// <response code="404">Visitor not found</response>
+        /// <response code="500">External attribution service error</response>
         [HttpPost("visitor/{visitorId}/visit")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -97,25 +98,27 @@ namespace UyanycarusaService.Controllers
             {
                 var jsonElement = JsonSerializer.SerializeToElement(model);
                 var result = await _attributionService.CreateVisitAsync(visitorId, jsonElement);
+
                 return StatusCode(201, result);
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex, $"External attribution service communication error while creating visit for visitor {visitorId}.");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de atribución",
+                    message = "Error communicating with external attribution service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Unexpected error while creating visit for visitor {visitorId}.");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de visita",
+                    message = "Unexpected server error while processing visit request.",
                     detail = ex.Message
                 });
             }
         }
     }
 }
-

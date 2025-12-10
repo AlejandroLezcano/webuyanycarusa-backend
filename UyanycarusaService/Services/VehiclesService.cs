@@ -151,11 +151,18 @@ namespace UyanycarusaService.Services
 
                 var response = await _httpClient.SendAsync(request);
 
-                if (response.IsSuccessStatusCode){
+                if (response.IsSuccessStatusCode)
+                {
                     var content = await response.Content.ReadAsStringAsync();
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-
                     return json;
+                }
+
+                // If external service returns NotFound, return empty array (vehicle not in their database)
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    _logger.LogWarning("External service returned NotFound for trims: Year={Year}, Make={Make}, Model={Model}. Returning empty array.", year, make, model);
+                    return JsonSerializer.Deserialize<JsonElement>("[]");
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();

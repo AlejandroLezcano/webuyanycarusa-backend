@@ -6,7 +6,8 @@ using UyanycarusaService.Services;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de contenido de marca y modelo
+    /// Controller for make/model content operations.
+    /// All endpoints require a valid JWT token.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
@@ -18,21 +19,23 @@ namespace UyanycarusaService.Controllers
         private readonly IMakeModelContentService _makeModelContentService;
         private readonly ILogger<MakeModelContentController> _logger;
 
-        public MakeModelContentController(IMakeModelContentService makeModelContentService, ILogger<MakeModelContentController> logger)
+        public MakeModelContentController(
+            IMakeModelContentService makeModelContentService,
+            ILogger<MakeModelContentController> logger)
         {
             _makeModelContentService = makeModelContentService;
             _logger = logger;
         }
 
         /// <summary>
-        /// Obtiene el contenido de una marca específica
+        /// Retrieves content for a specific vehicle make.
         /// </summary>
-        /// <param name="make">Nombre de la marca</param>
-        /// <returns>Respuesta con contenido de la marca del servicio externo</returns>
-        /// <response code="200">Contenido de marca obtenido correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Marca no encontrada</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="make">Vehicle make name.</param>
+        /// <returns>Content payload from the external service.</returns>
+        /// <response code="200">Make content retrieved successfully.</response>
+        /// <response code="401">Unauthorized. A valid JWT token is required.</response>
+        /// <response code="404">Make not found.</response>
+        /// <response code="500">Error communicating with external service.</response>
         [HttpGet("make-model/{make}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -47,32 +50,34 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex, "External service error while fetching make content ({Make})", make);
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de contenido de marca",
+                    message = "Error communicating with the external make content service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error while processing make content request ({Make})", make);
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de contenido de marca",
+                    message = "Unexpected error processing make content request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene el contenido de una marca y modelo específicos
+        /// Retrieves content for a specific make and model.
         /// </summary>
-        /// <param name="make">Nombre de la marca</param>
-        /// <param name="model">Nombre del modelo</param>
-        /// <returns>Respuesta con contenido de la marca y modelo del servicio externo</returns>
-        /// <response code="200">Contenido de marca y modelo obtenido correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="404">Marca o modelo no encontrado</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="make">Vehicle make name.</param>
+        /// <param name="model">Vehicle model name.</param>
+        /// <returns>Content payload for the make and model.</returns>
+        /// <response code="200">Make/model content retrieved successfully.</response>
+        /// <response code="401">Unauthorized. A valid JWT token is required.</response>
+        /// <response code="404">Make or model not found.</response>
+        /// <response code="500">Error communicating with external service.</response>
         [HttpGet("make-model/{make}/{model}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -87,21 +92,22 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex, "External service error while fetching make/model content ({Make}/{Model})", make, model);
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de contenido de marca y modelo",
+                    message = "Error communicating with the external make/model content service.",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error while processing make/model content request ({Make}/{Model})", make, model);
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de contenido de marca y modelo",
+                    message = "Unexpected error processing make/model content request.",
                     detail = ex.Message
                 });
             }
         }
     }
 }
-

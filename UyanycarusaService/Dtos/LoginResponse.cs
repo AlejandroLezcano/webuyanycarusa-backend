@@ -14,6 +14,11 @@ namespace UyanycarusaService.Dtos
         /// Token expiration date
         /// </summary>
         public DateTime ExpiresAt { get; init; }
+
+        /// <summary>
+        /// Token expiration in seconds
+        /// </summary>
+        public int ExpiresIn { get; init; }
     }
 }
 

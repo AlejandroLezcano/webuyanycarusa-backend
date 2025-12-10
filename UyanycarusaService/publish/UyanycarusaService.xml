@@ -6,11 +6,17 @@
     <members>
         <member name="T:UyanycarusaService.Controllers.AppointmentController">
             <summary>
+<<<<<<< HEAD
             Controller for appointment operations
+=======
+            Controller for all appointment operations.
+            Requires a valid JWT for every request.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.AppointmentController.GetAvailability(System.String,System.Int32)">
             <summary>
+<<<<<<< HEAD
             Gets appointment availability for a specific zip code and vehicle
             </summary>
             <param name="zipCode">Zip code (5 digits)</param>
@@ -58,10 +64,51 @@
         <member name="T:UyanycarusaService.Controllers.AttributionController">
             <summary>
             Controlador para operaciones de atribución
+=======
+            Retrieves appointment availability for a specific ZIP code and customer vehicle ID.
+            </summary>
+            <param name="zipCode">ZIP code (5 digits)</param>
+            <param name="customerVehicleId">Customer vehicle record ID</param>
+            <returns>Availability response from external scheduling service</returns>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AppointmentController.BookAppointment(UyanycarusaService.Dtos.AppointmentBookingModel)">
+            <summary>
+            Books a new appointment for a customer.
+            </summary>
+            <param name="model">Appointment booking details</param>
+            <returns>External service booking response</returns>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AppointmentController.RescheduleAppointment(System.Int32,UyanycarusaService.Dtos.AppointmentBookingModel)">
+            <summary>
+            Reschedules an existing appointment.
+            </summary>
+            <param name="existingAppointmentId">Existing appointment ID</param>
+            <param name="model">New appointment details</param>
+            <returns>External service rescheduling response</returns>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AppointmentController.CancelAppointment(System.Int32,System.Int64)">
+            <summary>
+            Cancels an existing appointment for a specific vehicle using phone validation.
+            </summary>
+            <param name="customerVehicleId">Customer vehicle ID</param>
+            <param name="phoneNumber">Customer phone number</param>
+            <returns>External cancellation service response</returns>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AppointmentController.PrepareAppointmentPayload(UyanycarusaService.Dtos.AppointmentBookingModel)">
+            <summary>
+            Normalizes the appointment booking model into a clean JSON payload with yyyy-MM-dd date formatting.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.AttributionController">
+            <summary>
+            Controller responsible for attribution-related operations.
+            All endpoints require a valid JWT.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.AttributionController.CreateOrGetVisitor(System.Nullable{System.Int64})">
             <summary>
+<<<<<<< HEAD
             Crea o obtiene un visitor
             </summary>
             <param name="oldVisitorId">ID del visitor anterior opcional (para migración)</param>
@@ -114,10 +161,48 @@
         <member name="T:UyanycarusaService.Controllers.BranchContentController">
             <summary>
             Controlador para operaciones de contenido de sucursales
+=======
+            Creates or retrieves a visitor record.
+            </summary>
+            <param name="oldVisitorId">Optional previous visitor ID used for migration fallback</param>
+            <returns>Visitor information from the external attribution service</returns>
+            <response code="200">Visitor retrieved successfully</response>
+            <response code="201">Visitor created successfully</response>
+            <response code="401">Unauthorized – valid JWT required</response>
+            <response code="500">External attribution service error</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AttributionController.CreateVisit(System.Int64,UyanycarusaService.Dtos.VisitRequestModel)">
+            <summary>
+            Registers a visit event for a specific visitor.
+            </summary>
+            <param name="visitorId">The visitor's unique ID</param>
+            <param name="model">Visit details payload</param>
+            <returns>Visit event response from external attribution system</returns>
+            <response code="201">Visit recorded successfully</response>
+            <response code="400">Invalid request body</response>
+            <response code="401">Unauthorized – valid JWT required</response>
+            <response code="404">Visitor not found</response>
+            <response code="500">External attribution service error</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.AuthController">
+            <summary>
+            Controller responsible for authentication and JWT token generation.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AuthController.Login(UyanycarusaService.Dtos.LoginRequest)">
+            <summary>
+            Authenticates a user and generates a signed JWT token.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.BranchContentController">
+            <summary>
+            Controller for branch content operations.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.BranchContentController.GetBranches(System.String,System.Nullable{System.Int32},System.String)">
             <summary>
+<<<<<<< HEAD
             Obtiene la lista de sucursales disponibles
             </summary>
             <param name="zipCode">Código postal opcional (5 dígitos)</param>
@@ -144,10 +229,40 @@
         <member name="T:UyanycarusaService.Controllers.ContentController">
             <summary>
             Controlador para operaciones de contenido
+=======
+            Gets the list of available branches.
+            </summary>
+            <param name="zipCode">Optional ZIP code (5 digits)</param>
+            <param name="limit">Optional result limit</param>
+            <param name="branchType">Optional branch type (Physical, Mobile, All)</param>
+            <returns>List of branches returned by the external service</returns>
+            <response code="200">Branches retrieved successfully</response>
+            <response code="400">Invalid request for the external service</response>
+            <response code="401">Unauthorized. Valid JWT token required</response>
+            <response code="500">Error consuming external service</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.BranchContentController.GetBranchDetail(System.Int32)">
+            <summary>
+            Gets branch details for a specific branch ID.
+            </summary>
+            <param name="branchId">Branch ID</param>
+            <returns>Branch details returned by the external service</returns>
+            <response code="200">Branch details retrieved successfully</response>
+            <response code="400">Invalid request for the external service</response>
+            <response code="401">Unauthorized. Valid JWT token required</response>
+            <response code="404">Branch not found</response>
+            <response code="500">Error consuming external service</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.ContentController">
+            <summary>
+            Controller for dynamic website content (FAQs, landing pages, etc.).
+            All endpoints require a valid JWT token.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.ContentController.GetFaqs">
             <summary>
+<<<<<<< HEAD
             Obtiene la lista de categorías de FAQs
             </summary>
             <returns>Respuesta con lista de categorías de FAQs del servicio externo</returns>
@@ -189,10 +304,35 @@
         <member name="T:UyanycarusaService.Controllers.CustomerJourneyController">
             <summary>
             Controller for customer journey operations
+=======
+            Retrieves a list of FAQ categories.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ContentController.GetFaqsBySlug(System.String)">
+            <summary>
+            Retrieves detailed FAQs for a specific slug.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ContentController.GetLandingPages">
+            <summary>
+            Retrieves a list of available landing pages.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ContentController.GetLandingPageBySlug(System.String)">
+            <summary>
+            Retrieves the content of a landing page by slug.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.CustomerJourneyController">
+            <summary>
+            Controller for all Customer Journey operations.
+            All endpoints require a valid JWT token.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetJourneyById(System.Guid)">
             <summary>
+<<<<<<< HEAD
             Gets a customer journey by its ID (UUID)
             </summary>
             <param name="id">Journey ID (UUID)</param>
@@ -299,10 +439,60 @@
         <member name="T:UyanycarusaService.Controllers.MakeModelContentController">
             <summary>
             Controlador para operaciones de contenido de marca y modelo
+=======
+            Retrieves a customer journey by its UUID.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetJourneyByVisitId(System.Int32)">
+            <summary>
+            Retrieves a customer journey by visitId (integer).
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithYMM(UyanycarusaService.Dtos.CustomerJourneyStep1YMMModel)">
+            <summary>
+            Starts a customer journey using Year/Make/Model.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithVIN(UyanycarusaService.Dtos.CustomerJourneyStep1VINModel)">
+            <summary>
+            Starts a customer journey using a VIN.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithPlate(UyanycarusaService.Dtos.CustomerJourneyStep1PlateModel)">
+            <summary>
+            Starts a customer journey using a license plate.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateVehicleDetails(System.String,UyanycarusaService.Dtos.CustomerJourneyStep2Model)">
+            <summary>
+            Updates the vehicle details in the customer journey.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetDamageOptions(System.String)">
+            <summary>
+            Retrieves the available damage options for a given customer journey.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateVehicleCondition(System.String,UyanycarusaService.Dtos.CustomerJourneyStep3Model)">
+            <summary>
+            Updates vehicle condition details.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateBodyWork(System.String,UyanycarusaService.Dtos.CustomerJourneyStep4Model)">
+            <summary>
+            Updates body work information for the customer journey.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.MakeModelContentController">
+            <summary>
+            Controller for make/model content operations.
+            All endpoints require a valid JWT token.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.MakeModelContentController.GetMakeContent(System.String)">
             <summary>
+<<<<<<< HEAD
             Obtiene el contenido de una marca específica
             </summary>
             <param name="make">Nombre de la marca</param>
@@ -327,10 +517,38 @@
         <member name="T:UyanycarusaService.Controllers.SchedulingController">
             <summary>
             Controlador para operaciones de Scheduling (OTP)
+=======
+            Retrieves content for a specific vehicle make.
+            </summary>
+            <param name="make">Vehicle make name.</param>
+            <returns>Content payload from the external service.</returns>
+            <response code="200">Make content retrieved successfully.</response>
+            <response code="401">Unauthorized. A valid JWT token is required.</response>
+            <response code="404">Make not found.</response>
+            <response code="500">Error communicating with external service.</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.MakeModelContentController.GetMakeModelContent(System.String,System.String)">
+            <summary>
+            Retrieves content for a specific make and model.
+            </summary>
+            <param name="make">Vehicle make name.</param>
+            <param name="model">Vehicle model name.</param>
+            <returns>Content payload for the make and model.</returns>
+            <response code="200">Make/model content retrieved successfully.</response>
+            <response code="401">Unauthorized. A valid JWT token is required.</response>
+            <response code="404">Make or model not found.</response>
+            <response code="500">Error communicating with external service.</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.SchedulingController">
+            <summary>
+            Controller for Scheduling (OTP) operations.
+            All endpoints require a valid JWT token.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.SchedulingController.RequestOTP(UyanycarusaService.Dtos.ScheduleOTPRequest)">
             <summary>
+<<<<<<< HEAD
             Requests an OTP code for scheduling
             </summary>
             <param name="model">OTP request data</param>
@@ -345,10 +563,28 @@
         <member name="T:UyanycarusaService.Controllers.SmsController">
             <summary>
             Controlador para operaciones relacionadas con SMS
+=======
+            Requests an OTP code for scheduling.
+            </summary>
+            <param name="model">OTP request payload.</param>
+            <returns>OTP response from the external service.</returns>
+            <response code="202">OTP request accepted.</response>
+            <response code="400">Invalid request sent to the external service.</response>
+            <response code="401">Unauthorized. A valid JWT token is required.</response>
+            <response code="404">Resource not found by external provider.</response>
+            <response code="429">Too many requests (rate limited).</response>
+            <response code="500">Unexpected error communicating with external OTP provider.</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.SmsController">
+            <summary>
+            Controller for SMS operations.
+            All endpoints require a valid JWT token.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.SmsController.SendSms(UyanycarusaService.Dtos.SmsSendModel)">
             <summary>
+<<<<<<< HEAD
             Envía un SMS a través del servicio externo
             </summary>
             <param name="request">Datos del SMS a enviar (customerVehicleId, recipient, message)</param>
@@ -362,10 +598,27 @@
         <member name="T:UyanycarusaService.Controllers.ValuationController">
             <summary>
             Controlador para operaciones de valuación de vehículos
+=======
+            Sends an SMS using the external SMS provider.
+            </summary>
+            <param name="request">SMS request payload (customerVehicleId, recipient, message).</param>
+            <returns>Response from the external SMS service.</returns>
+            <response code="200">SMS sent successfully.</response>
+            <response code="400">Invalid request. SMS data is missing or incorrect.</response>
+            <response code="401">Unauthorized. A valid JWT token is required.</response>
+            <response code="429">Too many requests. Rate limit exceeded.</response>
+            <response code="500">Error communicating with external SMS provider.</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.ValuationController">
+            <summary>
+            Controller for vehicle valuation operations.
+            All endpoints require a valid JWT token.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.ValuationController.CreateValuation(UyanycarusaService.Dtos.ValuationModel)">
             <summary>
+<<<<<<< HEAD
             Realiza una valuación básica del vehículo
             </summary>
             <param name="model">Payload enviado al endpoint externo /Valuation</param>
@@ -389,10 +642,37 @@
         <member name="T:UyanycarusaService.Controllers.VehiclesController">
             <summary>
             Controlador para operaciones relacionadas con vehículos
+=======
+            Performs a basic vehicle valuation.
+            </summary>
+            <param name="model">Payload sent to the external /Valuation endpoint.</param>
+            <returns>Valuation response from the external service.</returns>
+            <response code="200">Valuation completed successfully.</response>
+            <response code="400">Invalid request for external service.</response>
+            <response code="401">Unauthorized. Valid JWT token required.</response>
+            <response code="500">Error communicating with external valuation provider.</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ValuationController.CreateValuationWithDamage(UyanycarusaService.Dtos.ValuationWithDamageModel)">
+            <summary>
+            Performs a vehicle valuation including damage information.
+            </summary>
+            <param name="model">Payload sent to the external /Valuation/with-damage endpoint.</param>
+            <returns>Valuation response from the external service.</returns>
+            <response code="200">Valuation completed successfully.</response>
+            <response code="400">Invalid request for external service.</response>
+            <response code="401">Unauthorized. Valid JWT token required.</response>
+            <response code="500">Error communicating with external valuation provider.</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.VehiclesController">
+            <summary>
+            Controller for all vehicle-related operations.
+            Requires valid JWT authentication for all endpoints.
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="M:UyanycarusaService.Controllers.VehiclesController.GetYears">
             <summary>
+<<<<<<< HEAD
             Obtiene la lista de años disponibles de vehículos desde el servicio externo
             </summary>
             <returns>Lista de años disponibles (enteros)</returns>
@@ -450,6 +730,116 @@
         <member name="T:UyanycarusaService.Dtos.AppointmentBookingModel">
             <summary>
             Model for booking an appointment
+=======
+            Retrieves the available vehicle years from the external service.
+            </summary>
+            <returns>List of available years.</returns>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetMakes(System.Int32)">
+            <summary>
+            Retrieves available makes for a specific year.
+            </summary>
+            <param name="year">Vehicle year.</param>
+            <returns>List of available makes.</returns>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetModels(System.Int32,System.String)">
+            <summary>
+            Retrieves available models for a given year and make.
+            </summary>
+            <param name="year">Vehicle year.</param>
+            <param name="make">Vehicle make.</param>
+            <returns>List of available models.</returns>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetTrims(System.Int32,System.String,System.String)">
+            <summary>
+            Retrieves available trim information for a given year, make, and model.
+            </summary>
+            <param name="year">Vehicle year.</param>
+            <param name="make">Vehicle make.</param>
+            <param name="model">Vehicle model.</param>
+            <returns>Trim list (body style, series, images).</returns>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetImage(System.String)">
+            <summary>
+            Retrieves an image from an external URL.
+            </summary>
+            <param name="url">External image URL.</param>
+            <returns>Binary image stream.</returns>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.AppointmentBookingModel">
+            <summary>
+            Model used for booking an appointment with customer and vehicle information.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.CustomerVehicleId">
+            <summary>
+            ID of the customer's vehicle.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.BranchId">
+            <summary>
+            Branch where the appointment will be scheduled.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.Date">
+            <summary>
+            Appointment date.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.TimeSlotId">
+            <summary>
+            Selected time slot ID.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.CustomerPhoneNumber">
+            <summary>
+            Customer phone number. Must be valid per NANP rules.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.CustomerFirstName">
+            <summary>
+            Customer first name.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.CustomerLastName">
+            <summary>
+            Customer last name.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.Email">
+            <summary>
+            Customer email (optional).
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.Address1">
+            <summary>
+            Customer address line 1 (optional).
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.Address2">
+            <summary>
+            Customer address line 2 (optional).
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.City">
+            <summary>
+            Customer city (optional).
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.VisitId">
+            <summary>
+            Visit ID associated with the customer journey (optional).
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.SmsOptIn">
+            <summary>
+            Indicates if the customer opted in for SMS communications.
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.AppointmentBookingModel.OtpCode">
+            <summary>
+            OTP code used for appointment validation (optional).
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
             </summary>
         </member>
         <member name="T:UyanycarusaService.Dtos.CustomerJourneyStep1PlateModel">
@@ -519,6 +909,14 @@
             Token expiration date
             </summary>
         </member>
+<<<<<<< HEAD
+=======
+        <member name="P:UyanycarusaService.Dtos.LoginResponse.ExpiresIn">
+            <summary>
+            Token expiration in seconds
+            </summary>
+        </member>
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
         <member name="T:UyanycarusaService.Dtos.ScheduleOTPRequest">
             <summary>
             Model for requesting an OTP code

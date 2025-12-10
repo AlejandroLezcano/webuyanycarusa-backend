@@ -142,8 +142,8 @@ Now listening on: http://localhost:5001
 4. Open your browser and navigate to:
    - **Swagger UI**: `http://localhost:5001/swagger`
    - **Health Check**: `http://localhost:5001/health`
-
-### Option 3: Run with Docker
+Now listening on: http://localhost:5000
+```
 
 1. From the backend project root (`we-buy-any-car-back`), build the image:
 ```bash
@@ -163,7 +163,11 @@ Most endpoints require JWT authentication. To obtain a token:
 
 1. **Get JWT Token:**
    ```bash
+<<<<<<< HEAD
    POST http://localhost:5001/api/v1/auth/login
+=======
+   POST http://localhost:5000/api/v1/auth/login
+>>>>>>> 1fe4bd62a4aada5499b1c8217ad825b05aad87a5
    Content-Type: application/json
    
    {

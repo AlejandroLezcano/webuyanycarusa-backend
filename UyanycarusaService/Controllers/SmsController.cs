@@ -7,7 +7,8 @@ using UyanycarusaService.Services;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones relacionadas con SMS
+    /// Controller for SMS operations.
+    /// All endpoints require a valid JWT token.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
@@ -25,15 +26,15 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Envía un SMS a través del servicio externo
+        /// Sends an SMS using the external SMS provider.
         /// </summary>
-        /// <param name="request">Datos del SMS a enviar (customerVehicleId, recipient, message)</param>
-        /// <returns>Respuesta del servicio externo</returns>
-        /// <response code="200">SMS enviado exitosamente</response>
-        /// <response code="400">Solicitud inválida. Los datos del SMS son incorrectos</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
-        /// <response code="500">Error al comunicarse con el servicio externo</response>
+        /// <param name="request">SMS request payload (customerVehicleId, recipient, message).</param>
+        /// <returns>Response from the external SMS service.</returns>
+        /// <response code="200">SMS sent successfully.</response>
+        /// <response code="400">Invalid request. SMS data is missing or incorrect.</response>
+        /// <response code="401">Unauthorized. A valid JWT token is required.</response>
+        /// <response code="429">Too many requests. Rate limit exceeded.</response>
+        /// <response code="500">Error communicating with external SMS provider.</response>
         [HttpPost("send")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -46,22 +47,22 @@ namespace UyanycarusaService.Controllers
             {
                 if (request == null)
                 {
-                    return BadRequest(new { message = "El cuerpo de la solicitud es requerido" });
+                    return BadRequest(new { message = "Request body is required." });
                 }
 
                 if (request.CustomerVehicleId <= 0)
                 {
-                    return BadRequest(new { message = "CustomerVehicleId debe ser mayor a 0" });
+                    return BadRequest(new { message = "CustomerVehicleId must be greater than 0." });
                 }
 
                 if (string.IsNullOrWhiteSpace(request.Recipient))
                 {
-                    return BadRequest(new { message = "Recipient es requerido" });
+                    return BadRequest(new { message = "Recipient is required." });
                 }
 
                 if (string.IsNullOrWhiteSpace(request.Message))
                 {
-                    return BadRequest(new { message = "Message es requerido" });
+                    return BadRequest(new { message = "Message is required." });
                 }
 
                 var result = await _smsService.SendSmsAsync(request);
@@ -69,9 +70,11 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
+                _logger.LogWarning(ex, "Error communicating with external SMS provider.");
+
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo para enviar SMS",
+                    message = "Error communicating with external SMS provider.",
                     detail = ex.Message
                 });
             }
@@ -79,7 +82,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing SMS request.",
                     detail = ex.Message
                 });
             }

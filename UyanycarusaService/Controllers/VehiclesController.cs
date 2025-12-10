@@ -1,19 +1,19 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
 using System.Text.Json;
 using UyanycarusaService.Services;
-using System.IO;
 
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones relacionadas con vehículos
+    /// Controller for all vehicle-related operations.
+    /// Requires valid JWT authentication for all endpoints.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/[controller]")]
     // OJO: sin [Authorize] aquí → todo el controller es público
+    [AllowAnonymous]
     public class VehiclesController : ControllerBase
     {
         private readonly IVehiclesService _vehiclesService;
@@ -26,8 +26,9 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Obtiene la lista de años disponibles de vehículos desde el servicio externo
+        /// Retrieves the available vehicle years from the external service.
         /// </summary>
+        /// <returns>List of available years.</returns>
         [HttpGet("years")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
@@ -44,7 +45,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo",
+                    message = "Error communicating with the external vehicle service.",
                     detail = ex.Message
                 });
             }
@@ -52,15 +53,17 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing the request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene la lista de marcas para un año
+        /// Retrieves available makes for a specific year.
         /// </summary>
+        /// <param name="year">Vehicle year.</param>
+        /// <returns>List of available makes.</returns>
         [HttpGet("makes/{year}")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
@@ -77,7 +80,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo",
+                    message = "Error communicating with the external vehicle service.",
                     detail = ex.Message
                 });
             }
@@ -85,15 +88,18 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing the request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene la lista de modelos para un año y marca
+        /// Retrieves available models for a given year and make.
         /// </summary>
+        /// <param name="year">Vehicle year.</param>
+        /// <param name="make">Vehicle make.</param>
+        /// <returns>List of available models.</returns>
         [HttpGet("models/{year}/{make}")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
@@ -110,7 +116,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo",
+                    message = "Error communicating with the external vehicle service.",
                     detail = ex.Message
                 });
             }
@@ -118,21 +124,25 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing the request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Obtiene trims (versiones) para un año, marca y modelo
+        /// Retrieves available trim information for a given year, make, and model.
         /// </summary>
-        [HttpGet("trims/{year}/{make}/{model}")]
+        /// <param name="year">Vehicle year.</param>
+        /// <param name="make">Vehicle make.</param>
+        /// <param name="model">Vehicle model (query parameter to handle special characters).</param>
+        /// <returns>Trim list (body style, series, images).</returns>
+        [HttpGet("trims/{year}/{make}")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> GetTrims(int year, string make, string model)
+        public async Task<ActionResult<JsonElement>> GetTrims(int year, string make, [FromQuery] string model)
         {
             try
             {
@@ -143,7 +153,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo",
+                    message = "Error communicating with the external vehicle service.",
                     detail = ex.Message
                 });
             }
@@ -151,18 +161,22 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing the request.",
                     detail = ex.Message
                 });
             }
         }
 
         /// <summary>
-        /// Proxy para traer imágenes externas
+        /// Retrieves an image from an external URL.
         /// </summary>
+        /// <param name="url">External image URL.</param>
+        /// <returns>Binary image stream.</returns>
         [HttpGet("image")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetImage([FromQuery] string url)
         {
@@ -170,11 +184,11 @@ namespace UyanycarusaService.Controllers
             {
                 if (string.IsNullOrWhiteSpace(url))
                 {
-                    return BadRequest(new { message = "La URL es requerida" });
+                    return BadRequest(new { message = "Image URL is required." });
                 }
 
-                var (imageContent, contentType) = await _vehiclesService.GetImageAsync(url);
-                var stream = new MemoryStream(imageContent);
+                var (imageBytes, contentType) = await _vehiclesService.GetImageAsync(url);
+                var stream = new MemoryStream(imageBytes);
 
                 return new FileStreamResult(stream, contentType)
                 {
@@ -185,7 +199,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo para obtener la imagen",
+                    message = "Error fetching image from external provider.",
                     detail = ex.Message
                 });
             }
@@ -193,7 +207,7 @@ namespace UyanycarusaService.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud",
+                    message = "Unexpected error processing the image request.",
                     detail = ex.Message
                 });
             }

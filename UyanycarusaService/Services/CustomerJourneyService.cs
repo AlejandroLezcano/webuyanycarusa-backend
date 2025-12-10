@@ -344,7 +344,7 @@ namespace UyanycarusaService.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
-                    _logger.LogWarning("UpdateVehicleConditionAsync completado exitosamente para journey ID: {JourneyId}", id);
+                    _logger.LogWarning("UpdateVehicleConditionAsync completed successfully for journey ID: {JourneyId}", id);
                     return json;
                 }
 

@@ -12,16 +12,22 @@ using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Force URLs for dev mode (commented to allow --urls parameter)
+// builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:5001");
+
+// ALWAYS lowercase URLs
+builder.Services.AddRouting(o => o.LowercaseUrls = true);
+
 // Controllers
 builder.Services.AddControllers();
 
 // API Versioning
-builder.Services.AddApiVersioning(options =>
+builder.Services.AddApiVersioning(o =>
 {
-    options.DefaultApiVersion = new ApiVersion(1, 0);
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.ReportApiVersions = true;
-    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    o.DefaultApiVersion = new ApiVersion(1, 0);
+    o.AssumeDefaultVersionWhenUnspecified = true;
+    o.ReportApiVersions = true;
+    o.ApiVersionReader = new UrlSegmentApiVersionReader();
 });
 
 // Rate Limiting
@@ -32,16 +38,16 @@ builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>()
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
+var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey missing");
 
-builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(o =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
+.AddJwtBearer(o =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
+    o.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
@@ -54,11 +60,17 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Authorization (sin política global forzando auth en todo)
-builder.Services.AddAuthorization();
+// Authorization
+builder.Services.AddAuthorization(o =>
+{
+    o.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
-// Swagger with JWT support
+// Swagger + JWT fix
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -75,14 +87,15 @@ builder.Services.AddSwaggerGen(options =>
         options.IncludeXmlComments(xmlPath);
     }
 
+    // Correct JWT config
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header usando el esquema Bearer. Ejemplo: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
-        BearerFormat = "JWT"
+        BearerFormat = "JWT",
+        Description = "Enter: Bearer {token}"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -101,27 +114,25 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Health checks
+// Health Checks
 builder.Services.AddHealthChecks();
 
-// CORS Configuration
-builder.Services.AddCors(options =>
+// CORS
+builder.Services.AddCors(o =>
 {
-    options.AddPolicy("AllowLocalhost", policy =>
+    o.AddPolicy("AllowLocalhost", p =>
     {
-        var localhostOrigins = new[]
-        {
+        p.WithOrigins(
             "http://localhost:3000", "https://localhost:3000",
-            "http://localhost:3001", "https://localhost:3001",
-        };
-
-        policy.WithOrigins(localhostOrigins)
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+            "http://127.0.0.1:3000"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithExposedHeaders("Authorization");
     });
 
-    options.AddPolicy("AllowProduction", policy =>
+    o.AddPolicy("AllowProduction", policy =>
     {
         var productionOrigins = new[]
         {
@@ -152,18 +163,18 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
 
-// HttpClient configuration for external APIs
-var webuyAnyCarBaseUrl = builder.Configuration["ExternalApis:WebuyAnyCarBaseUrl"]
+// HttpClient
+var webuyBaseUrl = builder.Configuration["ExternalApis:WebuyAnyCarBaseUrl"]
     ?? "https://www.webuyanycarusa.com/api";
 
-builder.Services.AddHttpClient("WebuyAnyCarApi", client =>
+builder.Services.AddHttpClient("WebuyAnyCarApi", c =>
 {
-    client.BaseAddress = new Uri(webuyAnyCarBaseUrl);
-    client.Timeout = TimeSpan.FromSeconds(30);
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
-    client.DefaultRequestHeaders.Add("User-Agent", "UyanycarusaService/1.0");
+    c.BaseAddress = new Uri(webuyBaseUrl);
+    c.Timeout = TimeSpan.FromSeconds(30);
+    c.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
+// Build
 var app = builder.Build();
 
 // Forwarded headers (for NGINX reverse proxy)
@@ -183,27 +194,29 @@ else
     app.UseCors("AllowLocalhost");
 }
 
-// Rate Limiting Middleware
+// HTTPS
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+// Rate limiting
 app.UseIpRateLimiting();
 
 // Middlewares
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-// Authentication & Authorization
+// Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Swagger (solo en desarrollo)
-if (app.Environment.IsDevelopment())
+// Swagger - Always enabled for local development
+app.UseSwagger();
+app.UseSwaggerUI(o =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "WeBuyAnyCar USA API v1");
-        options.RoutePrefix = "swagger";
-        options.DisplayRequestDuration();
-    });
-}
+    o.RoutePrefix = "swagger";
+    o.SwaggerEndpoint("/swagger/v1/swagger.json", "WBAC API v1");
+});
 
 // Rutas de test / health públicas
 app.MapGet("/", () => "API OK").AllowAnonymous();
@@ -215,8 +228,8 @@ app.MapControllers();
 
 // Liveness/Health endpoint formal
 app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/health");
 
 app.Run();
 
-// For integration testing
 public partial class Program { }
