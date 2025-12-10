@@ -11,8 +11,8 @@ using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Force URLs for dev mode
-builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:5001");
+// Force URLs for dev mode (commented to allow --urls parameter)
+// builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:5001");
 
 // ALWAYS lowercase URLs
 builder.Services.AddRouting(o => o.LowercaseUrls = true);
@@ -171,16 +171,13 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Swagger
-if (app.Environment.IsDevelopment())
+// Swagger - Always enabled for local development
+app.UseSwagger();
+app.UseSwaggerUI(o =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(o =>
-    {
-        o.RoutePrefix = "swagger";
-        o.SwaggerEndpoint("/swagger/v1/swagger.json", "WBAC API v1");
-    });
-}
+    o.RoutePrefix = "swagger";
+    o.SwaggerEndpoint("/swagger/v1/swagger.json", "WBAC API v1");
+});
 
 app.MapControllers();
 app.MapHealthChecks("/health");

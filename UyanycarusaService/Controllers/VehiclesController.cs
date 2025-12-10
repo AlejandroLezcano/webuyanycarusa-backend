@@ -134,14 +134,14 @@ namespace UyanycarusaService.Controllers
         /// </summary>
         /// <param name="year">Vehicle year.</param>
         /// <param name="make">Vehicle make.</param>
-        /// <param name="model">Vehicle model.</param>
+        /// <param name="model">Vehicle model (query parameter to handle special characters).</param>
         /// <returns>Trim list (body style, series, images).</returns>
-        [HttpGet("trims/{year}/{make}/{model}")]
+        [HttpGet("trims/{year}/{make}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JsonElement>> GetTrims(int year, string make, string model)
+        public async Task<ActionResult<JsonElement>> GetTrims(int year, string make, [FromQuery] string model)
         {
             try
             {
