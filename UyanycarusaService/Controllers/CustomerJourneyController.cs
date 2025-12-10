@@ -123,7 +123,8 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, jsonOptions);
                 var result = await _customerJourneyService.CreateJourneyWithYMMAsync(jsonElement);
                 return Ok(result);
             }
@@ -159,7 +160,8 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, jsonOptions);
                 var result = await _customerJourneyService.CreateJourneyWithVINAsync(jsonElement);
                 return Ok(result);
             }
@@ -195,7 +197,8 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, jsonOptions);
                 var result = await _customerJourneyService.CreateJourneyWithPlateAsync(jsonElement);
                 return Ok(result);
             }
@@ -233,7 +236,8 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, jsonOptions);
                 var result = await _customerJourneyService.UpdateVehicleDetailsAsync(id, jsonElement);
                 return Ok(result);
             }
@@ -310,7 +314,8 @@ namespace UyanycarusaService.Controllers
                     id,
                     HttpContext.TraceIdentifier);
 
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, jsonOptions);
                 var result = await _customerJourneyService.UpdateVehicleConditionAsync(id, jsonElement);
 
                 _logger.LogInformation(
@@ -354,7 +359,8 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, jsonOptions);
                 var result = await _customerJourneyService.UpdateBodyWorkAsync(id, jsonElement);
                 return Ok(result);
             }
