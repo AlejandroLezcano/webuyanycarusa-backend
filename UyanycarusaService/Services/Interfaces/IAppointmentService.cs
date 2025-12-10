@@ -3,39 +3,39 @@ using System.Text.Json;
 namespace UyanycarusaService.Services
 {
     /// <summary>
-    /// Interfaz para el servicio de citas (appointments)
+    /// Interface for appointment service
     /// </summary>
     public interface IAppointmentService
     {
         /// <summary>
-        /// Obtiene la disponibilidad de citas para un código postal y vehículo específico
+        /// Gets appointment availability for a specific zip code and vehicle
         /// </summary>
-        /// <param name="zipCode">Código postal (5 dígitos)</param>
-        /// <param name="customerVehicleId">ID del vehículo del cliente</param>
-        /// <returns>Respuesta de disponibilidad como JSON</returns>
+        /// <param name="zipCode">Zip code (5 digits)</param>
+        /// <param name="customerVehicleId">Customer vehicle ID</param>
+        /// <returns>Availability response as JSON</returns>
         Task<JsonElement> GetAvailabilityAsync(string zipCode, int customerVehicleId);
 
         /// <summary>
-        /// Reserva una cita para un vehículo
+        /// Books an appointment for a vehicle
         /// </summary>
-        /// <param name="model">Datos de la reserva de cita</param>
-        /// <returns>Respuesta de reserva como JSON</returns>
+        /// <param name="model">Appointment booking data</param>
+        /// <returns>Booking response as JSON</returns>
         Task<JsonElement> BookAppointmentAsync(JsonElement model);
 
         /// <summary>
-        /// Reprograma una cita existente
+        /// Reschedules an existing appointment
         /// </summary>
-        /// <param name="existingAppointmentId">ID de la cita existente</param>
-        /// <param name="model">Datos de la nueva reserva de cita</param>
-        /// <returns>Respuesta de reprogramación como JSON</returns>
+        /// <param name="existingAppointmentId">Existing appointment ID</param>
+        /// <param name="model">New appointment booking data</param>
+        /// <returns>Reschedule response as JSON</returns>
         Task<JsonElement> RescheduleAppointmentAsync(int existingAppointmentId, JsonElement model);
 
         /// <summary>
-        /// Cancela una cita existente
+        /// Cancels an existing appointment
         /// </summary>
-        /// <param name="customerVehicleId">ID del vehículo del cliente</param>
-        /// <param name="phoneNumber">Número de teléfono del cliente</param>
-        /// <returns>Respuesta de cancelación como JSON</returns>
+        /// <param name="customerVehicleId">Customer vehicle ID</param>
+        /// <param name="phoneNumber">Customer phone number</param>
+        /// <returns>Cancellation response as JSON</returns>
         Task<JsonElement> CancelAppointmentAsync(int customerVehicleId, long phoneNumber);
     }
 }

@@ -26,13 +26,13 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Solicita un código OTP para programación
+        /// Requests an OTP code for scheduling
         /// </summary>
-        /// <param name="model">Datos de la solicitud OTP</param>
-        /// <returns>Respuesta de solicitud OTP del servicio externo</returns>
-        /// <response code="202">Solicitud OTP aceptada</response>
-        /// <response code="400">Solicitud inválida para el servicio externo</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
+        /// <param name="model">OTP request data</param>
+        /// <returns>OTP request response from external service</returns>
+        /// <response code="202">OTP request accepted</response>
+        /// <response code="400">Invalid request for external service</response>
+        /// <response code="401">Unauthorized. Valid JWT token required</response>
         /// <response code="404">Recurso no encontrado</response>
         /// <response code="429">Demasiadas solicitudes</response>
         /// <response code="500">Error al consumir el servicio externo</response>
@@ -47,7 +47,8 @@ namespace UyanycarusaService.Controllers
         {
             try
             {
-                var jsonElement = JsonSerializer.SerializeToElement(model);
+                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var jsonElement = JsonSerializer.SerializeToElement(model, jsonOptions);
                 var result = await _schedulingService.RequestOTPAsync(jsonElement);
                 return StatusCode(202, result);
             }

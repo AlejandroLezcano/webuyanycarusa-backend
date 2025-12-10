@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace UyanycarusaService.ModelsTests
 {
     /// <summary>
-    /// Datos de prueba para respuestas de contenido de sucursales cuando el servicio externo no responde.
+    /// Test data for branch content responses when external service doesn't respond.
     /// </summary>
     public static class BranchContentTestData
     {
@@ -153,13 +153,13 @@ namespace UyanycarusaService.ModelsTests
         }";
 
         /// <summary>
-        /// Obtiene una respuesta de lista de sucursales de ejemplo.
+        /// Gets a sample branch list response.
         /// </summary>
         public static JsonElement GetBranches()
             => JsonSerializer.Deserialize<JsonElement>(BranchesJson);
 
         /// <summary>
-        /// Obtiene una respuesta de detalle de sucursal de ejemplo.
+        /// Gets a sample branch detail response.
         /// </summary>
         public static JsonElement GetBranchDetail()
             => JsonSerializer.Deserialize<JsonElement>(BranchDetailJson);

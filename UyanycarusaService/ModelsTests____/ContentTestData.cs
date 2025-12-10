@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace UyanycarusaService.ModelsTests
 {
     /// <summary>
-    /// Datos de prueba para respuestas de contenido cuando el servicio externo no responde.
+    /// Test data for content responses when external service doesn't respond.
     /// </summary>
     public static class ContentTestData
     {
@@ -109,25 +109,25 @@ namespace UyanycarusaService.ModelsTests
         }";
 
         /// <summary>
-        /// Obtiene una respuesta de lista de FAQs de ejemplo.
+        /// Gets a sample FAQ list response.
         /// </summary>
         public static JsonElement GetFaqs()
             => JsonSerializer.Deserialize<JsonElement>(FaqsJson);
 
         /// <summary>
-        /// Obtiene una respuesta de FAQs por slug de ejemplo.
+        /// Gets a sample FAQs by slug response.
         /// </summary>
         public static JsonElement GetFaqsBySlug()
             => JsonSerializer.Deserialize<JsonElement>(FaqsBySlugJson);
 
         /// <summary>
-        /// Obtiene una respuesta de lista de landing pages de ejemplo.
+        /// Gets a sample landing pages list response.
         /// </summary>
         public static JsonElement GetLandingPages()
             => JsonSerializer.Deserialize<JsonElement>(LandingPagesJson);
 
         /// <summary>
-        /// Obtiene una respuesta de landing page por slug de ejemplo.
+        /// Gets a sample landing page by slug response.
         /// </summary>
         public static JsonElement GetLandingPageBySlug()
             => JsonSerializer.Deserialize<JsonElement>(LandingPageBySlugJson);

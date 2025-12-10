@@ -1,18 +1,18 @@
-
 using UyanycarusaService.Middlewares;
 using UyanycarusaService.Services;
+using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using AspNetCoreRateLimit;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Controllers
 builder.Services.AddControllers();
 
 // API Versioning
@@ -54,12 +54,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
+// Authorization (sin política global forzando auth en todo)
+builder.Services.AddAuthorization();
 
 // Swagger with JWT support
 builder.Services.AddEndpointsApiExplorer();
@@ -69,15 +65,9 @@ builder.Services.AddSwaggerGen(options =>
     {
         Version = "v1",
         Title = "WeBuyAnyCar USA API",
-        Description = "API para consultar información de vehículos desde WeBuyAnyCar USA.",
-        Contact = new OpenApiContact
-        {
-            Name = "WeBuyAnyCar USA Team",
-            Email = "support@webuyanycarusa.com"
-        }
+        Description = "API para consultar información de vehículos desde WeBuyAnyCar USA."
     });
 
-    // Include XML comments
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -85,7 +75,6 @@ builder.Services.AddSwaggerGen(options =>
         options.IncludeXmlComments(xmlPath);
     }
 
-    // JWT Bearer configuration for Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header usando el esquema Bearer. Ejemplo: \"Authorization: Bearer {token}\"",
@@ -120,7 +109,6 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", policy =>
     {
-        // Lista completa de orígenes comunes de localhost para desarrollo
         var localhostOrigins = new[]
         {
             "http://localhost:3000", "https://localhost:3000",
@@ -128,6 +116,22 @@ builder.Services.AddCors(options =>
         };
 
         policy.WithOrigins(localhostOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+
+    options.AddPolicy("AllowProduction", policy =>
+    {
+        var productionOrigins = new[]
+        {
+            "https://sellyourcarrnow.com",
+            "https://www.sellyourcarrnow.com",
+            "http://sellyourcarrnow.com",
+            "http://www.sellyourcarrnow.com"
+        };
+
+        policy.WithOrigins(productionOrigins)
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -162,33 +166,24 @@ builder.Services.AddHttpClient("WebuyAnyCarApi", client =>
 
 var app = builder.Build();
 
-// HTTPS Enforcement
-// En Development: HTTPS es recomendado pero no forzado
-// En Production: HTTPS es obligatorio
-if (app.Environment.IsDevelopment())
+// Forwarded headers (for NGINX reverse proxy)
+// No enforce HTTPS aquí, solo para que otros middlewares puedan usarlo si quieren.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-    app.UseHttpsRedirection(); // Redirige a HTTPS pero no bloquea HTTP
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
+
+// CORS Middleware
+if (app.Environment.IsProduction())
+{
+    app.UseCors("AllowProduction");
 }
 else
 {
-    // En producción, forzar HTTPS
-    app.UseHttpsRedirection();
-    app.Use(async (context, next) =>
-    {
-        if (!context.Request.IsHttps)
-        {
-            context.Response.StatusCode = 403;
-            await context.Response.WriteAsync("HTTPS is required.");
-            return;
-        }
-        await next();
-    });
+    app.UseCors("AllowLocalhost");
 }
 
-// CORS Middleware (must be before other middlewares)
-app.UseCors("AllowLocalhost");
-
-// Rate Limiting Middleware (must be before other middlewares)
+// Rate Limiting Middleware
 app.UseIpRateLimiting();
 
 // Middlewares
@@ -198,6 +193,7 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Swagger (solo en desarrollo)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -209,10 +205,16 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// Rutas de test / health públicas
+app.MapGet("/", () => "API OK").AllowAnonymous();
+app.MapGet("/health", () => "HEALTH OK").AllowAnonymous();
+app.MapGet("/testalive", () => "ALIVE").AllowAnonymous();
+
+// Controllers
 app.MapControllers();
 
-// Liveness/Health
-app.MapHealthChecks("/health");
+// Liveness/Health endpoint formal
+app.MapHealthChecks("/healthz");
 
 app.Run();
 

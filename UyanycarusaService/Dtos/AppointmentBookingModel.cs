@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace UyanycarusaService.Dtos
 {
     /// <summary>
-    /// Modelo para reservar una cita
+    /// Model for booking an appointment
     /// </summary>
     public class AppointmentBookingModel
     {

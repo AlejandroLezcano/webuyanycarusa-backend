@@ -9,7 +9,7 @@ using System.Text;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para autenticación y generación de tokens JWT
+    /// Controller for authentication and JWT token generation
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
@@ -27,15 +27,15 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Autentica un usuario y genera un token JWT
+        /// Authenticates a user and generates a JWT token
         /// </summary>
-        /// <param name="request">Credenciales de autenticación</param>
-        /// <returns>Token JWT y fecha de expiración</returns>
-        /// <response code="200">Autenticación exitosa. Retorna el token JWT</response>
-        /// <response code="400">Solicitud inválida. Las credenciales son incorrectas</response>
-        /// <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
+        /// <param name="request">Authentication credentials</param>
+        /// <returns>JWT token and expiration date</returns>
+        /// <response code="200">Successful authentication. Returns the JWT token</response>
+        /// <response code="400">Invalid request. Credentials are incorrect</response>
+        /// <response code="429">Too many requests. Rate limit exceeded</response>
         /// <remarks>
-        /// Ejemplo de solicitud:
+        /// Request example:
         ///
         ///     POST /api/v1/auth/login
         ///     {
@@ -43,8 +43,8 @@ namespace UyanycarusaService.Controllers
         ///         "password": "password123"
         ///     }
         ///
-        /// **Nota:** En un entorno de producción, las credenciales deben validarse contra una base de datos o servicio de autenticación.
-        /// Este es un ejemplo simplificado que acepta cualquier credencial.
+        /// **Note:** In a production environment, credentials should be validated against a database or authentication service.
+        /// This is a simplified example that accepts any credentials.
         /// </remarks>
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -54,12 +54,12 @@ namespace UyanycarusaService.Controllers
         {
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest(new { message = "Username y Password son requeridos" });
+                return BadRequest(new { message = "Username and Password are required" });
             }
 
-            // En producción, validar contra base de datos o servicio de autenticación
-            // Por ahora, aceptamos cualquier credencial para demostración
-            // TODO: Implementar validación real de credenciales
+            // In production, validate against database or authentication service
+            // For now, we accept any credentials for demonstration
+            // TODO: Implement real credential validation
 
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");

@@ -1,0 +1,1240 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UyanycarusaService</name>
+    </assembly>
+    <members>
+        <member name="T:UyanycarusaService.Controllers.AppointmentController">
+            <summary>
+            Controller for appointment operations
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AppointmentController.GetAvailability(System.String,System.Int32)">
+            <summary>
+            Gets appointment availability for a specific zip code and vehicle
+            </summary>
+            <param name="zipCode">Zip code (5 digits)</param>
+            <param name="customerVehicleId">Customer vehicle ID</param>
+            <returns>Availability response from external service</returns>
+            <response code="200">Availability retrieved successfully</response>
+            <response code="401">Unauthorized. Valid JWT token required</response>
+            <response code="500">Error consuming external service</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AppointmentController.BookAppointment(UyanycarusaService.Dtos.AppointmentBookingModel)">
+            <summary>
+            Reserva una cita para un vehículo
+            </summary>
+            <param name="model">Datos de la reserva de cita</param>
+            <returns>Respuesta de reserva del servicio externo</returns>
+            <response code="200">Cita reservada correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AppointmentController.RescheduleAppointment(System.Int32,UyanycarusaService.Dtos.AppointmentBookingModel)">
+            <summary>
+            Reprograma una cita existente
+            </summary>
+            <param name="existingAppointmentId">ID de la cita existente</param>
+            <param name="model">Datos de la nueva reserva de cita</param>
+            <returns>Respuesta de reprogramación del servicio externo</returns>
+            <response code="200">Cita reprogramada correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AppointmentController.CancelAppointment(System.Int32,System.Int64)">
+            <summary>
+            Cancela una cita existente
+            </summary>
+            <param name="customerVehicleId">ID del vehículo del cliente</param>
+            <param name="phoneNumber">Número de teléfono del cliente</param>
+            <returns>Respuesta de cancelación del servicio externo</returns>
+            <response code="200">Cita cancelada correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Cita no encontrada</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.AttributionController">
+            <summary>
+            Controlador para operaciones de atribución
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AttributionController.CreateOrGetVisitor(System.Nullable{System.Int64})">
+            <summary>
+            Crea o obtiene un visitor
+            </summary>
+            <param name="oldVisitorId">ID del visitor anterior opcional (para migración)</param>
+            <returns>Respuesta con información del visitor del servicio externo</returns>
+            <response code="200">Visitor obtenido correctamente</response>
+            <response code="201">Visitor creado correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AttributionController.CreateVisit(System.Int64,UyanycarusaService.Dtos.VisitRequestModel)">
+            <summary>
+            Registra una visita para un visitor
+            </summary>
+            <param name="visitorId">ID del visitor</param>
+            <param name="model">Datos de la visita</param>
+            <returns>Respuesta con información de la visita del servicio externo</returns>
+            <response code="201">Visita registrada correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Visitor no encontrado</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.AuthController">
+            <summary>
+            Controller for authentication and JWT token generation
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.AuthController.Login(UyanycarusaService.Dtos.LoginRequest)">
+             <summary>
+             Authenticates a user and generates a JWT token
+             </summary>
+             <param name="request">Authentication credentials</param>
+             <returns>JWT token and expiration date</returns>
+             <response code="200">Successful authentication. Returns the JWT token</response>
+             <response code="400">Invalid request. Credentials are incorrect</response>
+             <response code="429">Too many requests. Rate limit exceeded</response>
+             <remarks>
+             Request example:
+            
+                 POST /api/v1/auth/login
+                 {
+                     "username": "admin",
+                     "password": "password123"
+                 }
+            
+             **Note:** In a production environment, credentials should be validated against a database or authentication service.
+             This is a simplified example that accepts any credentials.
+             </remarks>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.BranchContentController">
+            <summary>
+            Controlador para operaciones de contenido de sucursales
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.BranchContentController.GetBranches(System.String,System.Nullable{System.Int32},System.String)">
+            <summary>
+            Obtiene la lista de sucursales disponibles
+            </summary>
+            <param name="zipCode">Código postal opcional (5 dígitos)</param>
+            <param name="limit">Límite de resultados opcional</param>
+            <param name="branchType">Tipo de sucursal opcional (Physical, Mobile, All)</param>
+            <returns>Respuesta con lista de sucursales del servicio externo</returns>
+            <response code="200">Lista de sucursales obtenida correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.BranchContentController.GetBranchDetail(System.Int32)">
+            <summary>
+            Obtiene el detalle de una sucursal específica
+            </summary>
+            <param name="branchId">ID de la sucursal</param>
+            <returns>Respuesta con detalle de la sucursal del servicio externo</returns>
+            <response code="200">Detalle de sucursal obtenido correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Sucursal no encontrada</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.ContentController">
+            <summary>
+            Controlador para operaciones de contenido
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ContentController.GetFaqs">
+            <summary>
+            Obtiene la lista de categorías de FAQs
+            </summary>
+            <returns>Respuesta con lista de categorías de FAQs del servicio externo</returns>
+            <response code="200">Lista de FAQs obtenida correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ContentController.GetFaqsBySlug(System.String)">
+            <summary>
+            Obtiene el detalle de FAQs por slug
+            </summary>
+            <param name="slug">Slug de la categoría de FAQ</param>
+            <returns>Respuesta con FAQs detalladas del servicio externo</returns>
+            <response code="200">FAQs obtenidas correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">FAQ no encontrada</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ContentController.GetLandingPages">
+            <summary>
+            Obtiene la lista de páginas de landing disponibles
+            </summary>
+            <returns>Respuesta con lista de páginas de landing del servicio externo</returns>
+            <response code="200">Lista de landing pages obtenida correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ContentController.GetLandingPageBySlug(System.String)">
+            <summary>
+            Obtiene el contenido de una página de landing por slug
+            </summary>
+            <param name="slug">Slug de la página de landing</param>
+            <returns>Respuesta con contenido de la página de landing del servicio externo</returns>
+            <response code="200">Landing page obtenida correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Landing page no encontrada</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.CustomerJourneyController">
+            <summary>
+            Controller for customer journey operations
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetJourneyById(System.Guid)">
+            <summary>
+            Gets a customer journey by its ID (UUID)
+            </summary>
+            <param name="id">Journey ID (UUID)</param>
+            <returns>Journey response from external service</returns>
+            <response code="200">Journey retrieved successfully</response>
+            <response code="401">Unauthorized. Valid JWT token required</response>
+            <response code="404">Journey not found</response>
+            <response code="500">Error consuming external service</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetJourneyByVisitId(System.Int32)">
+            <summary>
+            Gets a customer journey by visitId (integer)
+            </summary>
+            <param name="visitId">ID de la visita (integer)</param>
+            <returns>Respuesta del journey del servicio externo</returns>
+            <response code="200">Journey obtenido correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Journey no encontrado</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithYMM(UyanycarusaService.Dtos.CustomerJourneyStep1YMMModel)">
+            <summary>
+            Inicia un customer journey usando Year, Make, Model
+            </summary>
+            <param name="model">Datos del vehículo (YMM)</param>
+            <returns>Respuesta del journey del servicio externo</returns>
+            <response code="200">Journey creado correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithVIN(UyanycarusaService.Dtos.CustomerJourneyStep1VINModel)">
+            <summary>
+            Inicia un customer journey usando VIN
+            </summary>
+            <param name="model">Datos del vehículo (VIN)</param>
+            <returns>Respuesta del journey del servicio externo</returns>
+            <response code="200">Journey creado correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.CreateJourneyWithPlate(UyanycarusaService.Dtos.CustomerJourneyStep1PlateModel)">
+            <summary>
+            Inicia un customer journey usando License Plate
+            </summary>
+            <param name="model">Datos del vehículo (Plate)</param>
+            <returns>Respuesta del journey del servicio externo</returns>
+            <response code="200">Journey creado correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateVehicleDetails(System.String,UyanycarusaService.Dtos.CustomerJourneyStep2Model)">
+            <summary>
+            Actualiza los detalles del vehículo en el journey (Paso 2)
+            </summary>
+            <param name="id">ID del journey (UUID)</param>
+            <param name="model">Detalles del vehículo</param>
+            <returns>Respuesta del journey del servicio externo</returns>
+            <response code="200">Detalles actualizados correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Journey no encontrado</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.GetDamageOptions(System.String)">
+            <summary>
+            Obtiene las opciones de daño disponibles para un journey
+            </summary>
+            <param name="customerJourneyId">ID del journey (UUID)</param>
+            <returns>Respuesta con opciones de daño del servicio externo</returns>
+            <response code="200">Opciones de daño obtenidas correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Journey no encontrado</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateVehicleCondition(System.String,UyanycarusaService.Dtos.CustomerJourneyStep3Model)">
+            <summary>
+            Actualiza la condición del vehículo en el journey (Paso 3)
+            </summary>
+            <param name="id">ID del journey (UUID)</param>
+            <param name="model">Condición del vehículo</param>
+            <returns>Respuesta del journey del servicio externo</returns>
+            <response code="200">Condición actualizada correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Journey no encontrado</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.CustomerJourneyController.UpdateBodyWork(System.String,UyanycarusaService.Dtos.CustomerJourneyStep4Model)">
+            <summary>
+            Actualiza el trabajo de carrocería en el journey (Paso 4)
+            </summary>
+            <param name="id">ID del journey (UUID)</param>
+            <param name="model">Trabajo de carrocería</param>
+            <returns>Respuesta del journey del servicio externo</returns>
+            <response code="200">Trabajo de carrocería actualizado correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Journey no encontrado</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.MakeModelContentController">
+            <summary>
+            Controlador para operaciones de contenido de marca y modelo
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.MakeModelContentController.GetMakeContent(System.String)">
+            <summary>
+            Obtiene el contenido de una marca específica
+            </summary>
+            <param name="make">Nombre de la marca</param>
+            <returns>Respuesta con contenido de la marca del servicio externo</returns>
+            <response code="200">Contenido de marca obtenido correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Marca no encontrada</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.MakeModelContentController.GetMakeModelContent(System.String,System.String)">
+            <summary>
+            Obtiene el contenido de una marca y modelo específicos
+            </summary>
+            <param name="make">Nombre de la marca</param>
+            <param name="model">Nombre del modelo</param>
+            <returns>Respuesta con contenido de la marca y modelo del servicio externo</returns>
+            <response code="200">Contenido de marca y modelo obtenido correctamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="404">Marca o modelo no encontrado</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.SchedulingController">
+            <summary>
+            Controlador para operaciones de Scheduling (OTP)
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.SchedulingController.RequestOTP(UyanycarusaService.Dtos.ScheduleOTPRequest)">
+            <summary>
+            Requests an OTP code for scheduling
+            </summary>
+            <param name="model">OTP request data</param>
+            <returns>OTP request response from external service</returns>
+            <response code="202">OTP request accepted</response>
+            <response code="400">Invalid request for external service</response>
+            <response code="401">Unauthorized. Valid JWT token required</response>
+            <response code="404">Recurso no encontrado</response>
+            <response code="429">Demasiadas solicitudes</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.SmsController">
+            <summary>
+            Controlador para operaciones relacionadas con SMS
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.SmsController.SendSms(UyanycarusaService.Dtos.SmsSendModel)">
+            <summary>
+            Envía un SMS a través del servicio externo
+            </summary>
+            <param name="request">Datos del SMS a enviar (customerVehicleId, recipient, message)</param>
+            <returns>Respuesta del servicio externo</returns>
+            <response code="200">SMS enviado exitosamente</response>
+            <response code="400">Solicitud inválida. Los datos del SMS son incorrectos</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
+            <response code="500">Error al comunicarse con el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.ValuationController">
+            <summary>
+            Controlador para operaciones de valuación de vehículos
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ValuationController.CreateValuation(UyanycarusaService.Dtos.ValuationModel)">
+            <summary>
+            Realiza una valuación básica del vehículo
+            </summary>
+            <param name="model">Payload enviado al endpoint externo /Valuation</param>
+            <returns>Respuesta de valuación del servicio externo</returns>
+            <response code="200">Valuación realizada correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.ValuationController.CreateValuationWithDamage(UyanycarusaService.Dtos.ValuationWithDamageModel)">
+            <summary>
+            Realiza una valuación del vehículo incluyendo daños
+            </summary>
+            <param name="model">Payload enviado al endpoint externo /Valuation/with-damage</param>
+            <returns>Respuesta de valuación del servicio externo</returns>
+            <response code="200">Valuación realizada correctamente</response>
+            <response code="400">Solicitud inválida para el servicio externo</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="T:UyanycarusaService.Controllers.VehiclesController">
+            <summary>
+            Controlador para operaciones relacionadas con vehículos
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetYears">
+            <summary>
+            Obtiene la lista de años disponibles de vehículos desde el servicio externo
+            </summary>
+            <returns>Lista de años disponibles (enteros)</returns>
+            <response code="200">Retorna la lista de años exitosamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetMakes(System.Int32)">
+            <summary>
+            Obtiene la lista de marcas disponibles para un año específico desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <returns>Lista de marcas disponibles (strings)</returns>
+            <response code="200">Retorna la lista de marcas exitosamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetModels(System.Int32,System.String)">
+            <summary>
+            Obtiene la lista de modelos disponibles para un año y marca específicos desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <param name="make">Marca del vehículo</param>
+            <returns>Lista de modelos disponibles (strings)</returns>
+            <response code="200">Retorna la lista de modelos exitosamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetTrims(System.Int32,System.String,System.String)">
+            <summary>
+            Obtiene la lista de trims (versiones/equipamientos) disponibles para un año, marca y modelo específicos desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <param name="make">Marca del vehículo</param>
+            <param name="model">Modelo del vehículo</param>
+            <returns>Lista de trims disponibles (array de objetos con bodystyle, series, imageUrl)</returns>
+            <response code="200">Retorna la lista de trims exitosamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="429">Demasiadas solicitudes. Se ha excedido el límite de rate limiting</response>
+            <response code="500">Error al consumir el servicio externo</response>
+        </member>
+        <member name="M:UyanycarusaService.Controllers.VehiclesController.GetImage(System.String)">
+            <summary>
+            Obtiene una imagen desde una URL externa
+            </summary>
+            <param name="url">URL de la imagen a obtener</param>
+            <returns>Archivo de imagen</returns>
+            <response code="200">Retorna la imagen exitosamente</response>
+            <response code="401">No autorizado. Se requiere un token JWT válido</response>
+            <response code="500">Error al obtener la imagen desde la URL</response>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.AppointmentBookingModel">
+            <summary>
+            Model for booking an appointment
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.CustomerJourneyStep1PlateModel">
+            <summary>
+            Model to start a customer journey using License Plate
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.CustomerJourneyStep1VINModel">
+            <summary>
+            Model to start a customer journey using VIN
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.CustomerJourneyStep1YMMModel">
+            <summary>
+            Model to start a customer journey using Year, Make, Model
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.CustomerJourneyStep2Model">
+            <summary>
+            Modelo para actualizar los detalles del vehículo en el journey (Paso 2)
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.CustomerJourneyStep3Model">
+            <summary>
+            Modelo para actualizar la condición del vehículo en el journey (Paso 3)
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.CustomerJourneyStep4Model">
+            <summary>
+            Modelo para actualizar el trabajo de carrocería en el journey (Paso 4)
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.ComponentFaultViewModel">
+            <summary>
+            Modelo para representar un componente con falla
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.LoginRequest">
+            <summary>
+            DTO para solicitud de autenticación
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.LoginRequest.Username">
+            <summary>
+            Nombre de usuario
+            </summary>
+            <example>admin</example>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.LoginRequest.Password">
+            <summary>
+            Contraseña del usuario
+            </summary>
+            <example>password123</example>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.LoginResponse">
+            <summary>
+            DTO for authentication response
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.LoginResponse.Token">
+            <summary>
+            JWT token for authentication
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.LoginResponse.ExpiresAt">
+            <summary>
+            Token expiration date
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.ScheduleOTPRequest">
+            <summary>
+            Model for requesting an OTP code
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.SmsSendModel">
+            <summary>
+            Modelo para enviar un SMS
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.SmsSendModel.CustomerVehicleId">
+            <summary>
+            ID del vehículo del cliente
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.SmsSendModel.Recipient">
+            <summary>
+            Número de teléfono del destinatario
+            </summary>
+        </member>
+        <member name="P:UyanycarusaService.Dtos.SmsSendModel.Message">
+            <summary>
+            Mensaje a enviar
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.ValuationModel">
+            <summary>
+            Modelo para realizar una valuación básica del vehículo
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.ValuationWithDamageModel">
+            <summary>
+            Modelo para realizar una valuación del vehículo incluyendo daños
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Dtos.VisitRequestModel">
+            <summary>
+            Modelo para registrar una visita
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.AppointmentTestData">
+            <summary>
+            Test data for appointment responses when external service doesn't respond.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.AppointmentTestData.GetAvailability">
+            <summary>
+            Gets a sample appointment availability response.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.AppointmentTestData.GetBookedAppointment">
+            <summary>
+            Gets a sample booked appointment response.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.AppointmentTestData.GetRescheduledAppointment">
+            <summary>
+            Gets a sample rescheduled appointment response.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.AppointmentTestData.GetCancelledAppointment">
+            <summary>
+            Gets a sample cancelled appointment response.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.AttributionTestData">
+            <summary>
+            Datos de prueba para respuestas de atribución cuando el servicio externo no responde.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.AttributionTestData.GetVisitor">
+            <summary>
+            Obtiene una respuesta de visitor de ejemplo.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.AttributionTestData.GetVisit">
+            <summary>
+            Obtiene una respuesta de visita de ejemplo.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.BranchContentTestData">
+            <summary>
+            Test data for branch content responses when external service doesn't respond.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.BranchContentTestData.GetBranches">
+            <summary>
+            Gets a sample branch list response.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.BranchContentTestData.GetBranchDetail">
+            <summary>
+            Gets a sample branch detail response.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.ContentTestData">
+            <summary>
+            Test data for content responses when external service doesn't respond.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.ContentTestData.GetFaqs">
+            <summary>
+            Gets a sample FAQ list response.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.ContentTestData.GetFaqsBySlug">
+            <summary>
+            Gets a sample FAQs by slug response.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.ContentTestData.GetLandingPages">
+            <summary>
+            Gets a sample landing pages list response.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.ContentTestData.GetLandingPageBySlug">
+            <summary>
+            Gets a sample landing page by slug response.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.CustomerJourneyTestData">
+            <summary>
+            Datos de prueba para respuestas de customer journey cuando el servicio externo no responde.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.CustomerJourneyTestData.GetJourneyWithYMM">
+            <summary>
+            Obtiene una respuesta de journey con YMM de ejemplo.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.CustomerJourneyTestData.GetJourneyWithVIN">
+            <summary>
+            Obtiene una respuesta de journey con VIN de ejemplo.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.CustomerJourneyTestData.GetJourneyWithPlate">
+            <summary>
+            Obtiene una respuesta de journey con Plate de ejemplo.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.CustomerJourneyTestData.GetJourneyById">
+            <summary>
+            Obtiene una respuesta de journey por ID de ejemplo.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.CustomerJourneyTestData.GetJourneyByVisitId">
+            <summary>
+            Obtiene una respuesta de journey por visitId de ejemplo.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.CustomerJourneyTestData.GetUpdatedJourney">
+            <summary>
+            Obtiene una respuesta de journey actualizado de ejemplo.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.CustomerJourneyTestData.GetDamageOptions">
+            <summary>
+            Obtiene una respuesta de opciones de daño de ejemplo.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.MakeModelContentTestData">
+            <summary>
+            Datos de prueba para respuestas de contenido de marca y modelo cuando el servicio externo no responde.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.MakeModelContentTestData.GetMakeContent">
+            <summary>
+            Obtiene una respuesta de contenido de marca de ejemplo.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.MakeModelContentTestData.GetMakeModelContent">
+            <summary>
+            Obtiene una respuesta de contenido de marca y modelo de ejemplo.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.SchedulingTestData">
+            <summary>
+            Datos de prueba para respuestas de Scheduling cuando el servicio externo no responde.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.SchedulingTestData.GetRequestOTP">
+            <summary>
+            Obtiene una respuesta de solicitud OTP de ejemplo.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.ValuationTestData">
+            <summary>
+            Test data for valuation responses when external service doesn't respond.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.ValuationTestData.GetBasicValuation">
+            <summary>
+            Gets a sample basic valuation response.
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.ModelsTests.ValuationTestData.GetValuationWithDamage">
+            <summary>
+            Gets a sample valuation with damage response.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.ModelsTests.VehiclesTestData">
+            <summary>
+            Test data for vehicles when external service doesn't respond.
+            Contains years, makes, and models in a single file.
+            </summary>
+        </member>
+        <member name="F:UyanycarusaService.ModelsTests.VehiclesTestData.Years">
+            <summary>
+            Sample list of years to use in tests or as fallback.
+            </summary>
+        </member>
+        <member name="F:UyanycarusaService.ModelsTests.VehiclesTestData.DefaultMakes">
+            <summary>
+            Sample list of makes to use in tests or as fallback.
+            </summary>
+        </member>
+        <member name="F:UyanycarusaService.ModelsTests.VehiclesTestData.DefaultModels">
+            <summary>
+            Sample list of models to use in tests or as fallback.
+            Not dependent on a specific make, only for testing purposes.
+            </summary>
+        </member>
+        <member name="T:UyanycarusaService.Services.AppointmentService">
+            <summary>
+            Service for appointment operations
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.AppointmentService.GetAvailabilityAsync(System.String,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.AppointmentService.BookAppointmentAsync(System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.AppointmentService.RescheduleAppointmentAsync(System.Int32,System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.AppointmentService.CancelAppointmentAsync(System.Int32,System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.AttributionService">
+            <summary>
+            Servicio para operaciones de atribución
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.AttributionService.CreateOrGetVisitorAsync(System.Nullable{System.Int64})">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.AttributionService.CreateVisitAsync(System.Int64,System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.AuthService">
+            <summary>
+            Servicio para operaciones de autenticación con Azure AD
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.AuthService.GetTokenAsync">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.BranchContentService">
+            <summary>
+            Servicio para operaciones de contenido de sucursales
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.BranchContentService.GetBranchesAsync(System.String,System.Nullable{System.Int32},System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.BranchContentService.GetBranchDetailAsync(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.ContentService">
+            <summary>
+            Servicio para operaciones de contenido
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.ContentService.GetFaqsAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.ContentService.GetFaqsBySlugAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.ContentService.GetLandingPagesAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.ContentService.GetLandingPageBySlugAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.CustomerJourneyService">
+            <summary>
+            Servicio para operaciones de customer journey
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.CreateJourneyWithYMMAsync(System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.CreateJourneyWithVINAsync(System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.CreateJourneyWithPlateAsync(System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.RemoveNullProperties(System.Text.Json.JsonElement)">
+            <summary>
+            Removes properties with null values from a JsonElement
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.GetJourneyByIdAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.GetJourneyByVisitIdAsync(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.UpdateVehicleDetailsAsync(System.String,System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.GetDamageOptionsAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.UpdateVehicleConditionAsync(System.String,System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.CustomerJourneyService.UpdateBodyWorkAsync(System.String,System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.IAppointmentService">
+            <summary>
+            Interface for appointment service
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.IAppointmentService.GetAvailabilityAsync(System.String,System.Int32)">
+            <summary>
+            Gets appointment availability for a specific zip code and vehicle
+            </summary>
+            <param name="zipCode">Zip code (5 digits)</param>
+            <param name="customerVehicleId">Customer vehicle ID</param>
+            <returns>Availability response as JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IAppointmentService.BookAppointmentAsync(System.Text.Json.JsonElement)">
+            <summary>
+            Books an appointment for a vehicle
+            </summary>
+            <param name="model">Appointment booking data</param>
+            <returns>Booking response as JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IAppointmentService.RescheduleAppointmentAsync(System.Int32,System.Text.Json.JsonElement)">
+            <summary>
+            Reschedules an existing appointment
+            </summary>
+            <param name="existingAppointmentId">Existing appointment ID</param>
+            <param name="model">New appointment booking data</param>
+            <returns>Reschedule response as JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IAppointmentService.CancelAppointmentAsync(System.Int32,System.Int64)">
+            <summary>
+            Cancels an existing appointment
+            </summary>
+            <param name="customerVehicleId">Customer vehicle ID</param>
+            <param name="phoneNumber">Customer phone number</param>
+            <returns>Cancellation response as JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.IAttributionService">
+            <summary>
+            Interfaz para el servicio de atribución
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.IAttributionService.CreateOrGetVisitorAsync(System.Nullable{System.Int64})">
+            <summary>
+            Crea o obtiene un visitor
+            </summary>
+            <param name="oldVisitorId">ID del visitor anterior opcional (para migración)</param>
+            <returns>Respuesta con información del visitor como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IAttributionService.CreateVisitAsync(System.Int64,System.Text.Json.JsonElement)">
+            <summary>
+            Registra una visita para un visitor
+            </summary>
+            <param name="visitorId">ID del visitor</param>
+            <param name="model">Datos de la visita</param>
+            <returns>Respuesta con información de la visita como JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.IAuthService">
+            <summary>
+            Interfaz para el servicio de autenticación con Azure AD
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.IAuthService.GetTokenAsync">
+            <summary>
+            Obtiene un token de acceso de Azure AD usando el flujo de credenciales de cliente (client credentials)
+            </summary>
+            <returns>Respuesta del token como JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.IBranchContentService">
+            <summary>
+            Interfaz para el servicio de contenido de sucursales
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.IBranchContentService.GetBranchesAsync(System.String,System.Nullable{System.Int32},System.String)">
+            <summary>
+            Obtiene la lista de sucursales disponibles
+            </summary>
+            <param name="zipCode">Código postal opcional (5 dígitos)</param>
+            <param name="limit">Límite de resultados opcional</param>
+            <param name="branchType">Tipo de sucursal opcional (Physical, Mobile, All)</param>
+            <returns>Respuesta con lista de sucursales como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IBranchContentService.GetBranchDetailAsync(System.Int32)">
+            <summary>
+            Obtiene el detalle de una sucursal específica
+            </summary>
+            <param name="branchId">ID de la sucursal</param>
+            <returns>Respuesta con detalle de la sucursal como JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.IContentService">
+            <summary>
+            Interfaz para el servicio de contenido
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.IContentService.GetFaqsAsync">
+            <summary>
+            Obtiene la lista de categorías de FAQs
+            </summary>
+            <returns>Respuesta con lista de categorías de FAQs como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IContentService.GetFaqsBySlugAsync(System.String)">
+            <summary>
+            Obtiene el detalle de FAQs por slug
+            </summary>
+            <param name="slug">Slug de la categoría de FAQ</param>
+            <returns>Respuesta con FAQs detalladas como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IContentService.GetLandingPagesAsync">
+            <summary>
+            Obtiene la lista de páginas de landing disponibles
+            </summary>
+            <returns>Respuesta con lista de páginas de landing como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IContentService.GetLandingPageBySlugAsync(System.String)">
+            <summary>
+            Obtiene el contenido de una página de landing por slug
+            </summary>
+            <param name="slug">Slug de la página de landing</param>
+            <returns>Respuesta con contenido de la página de landing como JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.ICustomerJourneyService">
+            <summary>
+            Interfaz para el servicio de customer journey
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.CreateJourneyWithYMMAsync(System.Text.Json.JsonElement)">
+            <summary>
+            Inicia un customer journey usando Year, Make, Model
+            </summary>
+            <param name="model">Datos del vehículo (YMM)</param>
+            <returns>Respuesta del journey como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.CreateJourneyWithVINAsync(System.Text.Json.JsonElement)">
+            <summary>
+            Inicia un customer journey usando VIN
+            </summary>
+            <param name="model">Datos del vehículo (VIN)</param>
+            <returns>Respuesta del journey como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.CreateJourneyWithPlateAsync(System.Text.Json.JsonElement)">
+            <summary>
+            Inicia un customer journey usando License Plate
+            </summary>
+            <param name="model">Datos del vehículo (Plate)</param>
+            <returns>Respuesta del journey como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.GetJourneyByIdAsync(System.String)">
+            <summary>
+            Obtiene un customer journey por su ID (UUID)
+            </summary>
+            <param name="id">ID del journey (UUID)</param>
+            <returns>Respuesta del journey como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.GetJourneyByVisitIdAsync(System.Int32)">
+            <summary>
+            Obtiene un customer journey por visitId
+            </summary>
+            <param name="visitId">ID de la visita</param>
+            <returns>Respuesta del journey como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.UpdateVehicleDetailsAsync(System.String,System.Text.Json.JsonElement)">
+            <summary>
+            Actualiza los detalles del vehículo en el journey (Paso 2)
+            </summary>
+            <param name="id">ID del journey (UUID)</param>
+            <param name="model">Detalles del vehículo</param>
+            <returns>Respuesta del journey como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.GetDamageOptionsAsync(System.String)">
+            <summary>
+            Obtiene las opciones de daño disponibles para un journey
+            </summary>
+            <param name="customerJourneyId">ID del journey (UUID)</param>
+            <returns>Respuesta con opciones de daño como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.UpdateVehicleConditionAsync(System.String,System.Text.Json.JsonElement)">
+            <summary>
+            Actualiza la condición del vehículo en el journey (Paso 3)
+            </summary>
+            <param name="id">ID del journey (UUID)</param>
+            <param name="model">Condición del vehículo</param>
+            <returns>Respuesta del journey como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.ICustomerJourneyService.UpdateBodyWorkAsync(System.String,System.Text.Json.JsonElement)">
+            <summary>
+            Actualiza el trabajo de carrocería en el journey (Paso 4)
+            </summary>
+            <param name="id">ID del journey (UUID)</param>
+            <param name="model">Trabajo de carrocería</param>
+            <returns>Respuesta del journey como JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.IMakeModelContentService">
+            <summary>
+            Interfaz para el servicio de contenido de marca y modelo
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.IMakeModelContentService.GetMakeContentAsync(System.String)">
+            <summary>
+            Obtiene el contenido de una marca específica
+            </summary>
+            <param name="make">Nombre de la marca</param>
+            <returns>Respuesta con contenido de la marca como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IMakeModelContentService.GetMakeModelContentAsync(System.String,System.String)">
+            <summary>
+            Obtiene el contenido de una marca y modelo específicos
+            </summary>
+            <param name="make">Nombre de la marca</param>
+            <param name="model">Nombre del modelo</param>
+            <returns>Respuesta con contenido de la marca y modelo como JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.ISchedulingService">
+            <summary>
+            Interface for Scheduling service (OTP)
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.ISchedulingService.RequestOTPAsync(System.Text.Json.JsonElement)">
+            <summary>
+            Requests an OTP code for scheduling
+            </summary>
+            <param name="model">OTP request data</param>
+            <returns>OTP request response as JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.ISmsService">
+            <summary>
+            Interfaz para el servicio de SMS
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.ISmsService.SendSmsAsync(UyanycarusaService.Dtos.SmsSendModel)">
+            <summary>
+            Envía un SMS a través del servicio externo
+            </summary>
+            <param name="request">Datos del SMS a enviar</param>
+            <returns>Respuesta del servicio externo como JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.ITokenService">
+            <summary>
+            Interface for Azure AD token management service
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.ITokenService.GetAccessTokenAsync">
+            <summary>
+            Gets a valid access token (from cache or requesting a new one)
+            </summary>
+            <returns>Azure AD access token</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.IValuationService">
+            <summary>
+            Interfaz para el servicio de valuaciones
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.IValuationService.CreateValuationAsync(System.Text.Json.JsonElement)">
+            <summary>
+            Realiza una valuación básica del vehículo
+            </summary>
+            <param name="model">Payload enviado al endpoint /Valuation</param>
+            <returns>Respuesta de valuación como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IValuationService.CreateValuationWithDamageAsync(System.Text.Json.JsonElement)">
+            <summary>
+            Realiza una valuación del vehículo incluyendo daños
+            </summary>
+            <param name="model">Payload enviado al endpoint /Valuation/with-damage</param>
+            <returns>Respuesta de valuación como JSON</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.IVehiclesService">
+            <summary>
+            Interfaz para el servicio de vehículos
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.IVehiclesService.GetYearsAsync">
+            <summary>
+            Obtiene la lista de años disponibles de vehículos desde el servicio externo
+            </summary>
+            <returns>Lista de años disponibles</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IVehiclesService.GetMakesAsync(System.Int32)">
+            <summary>
+            Obtiene la lista de marcas disponibles para un año específico desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <returns>Lista de marcas disponibles</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IVehiclesService.GetModelsAsync(System.Int32,System.String)">
+            <summary>
+            Obtiene la lista de modelos disponibles para un año y marca específicos desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <param name="make">Marca del vehículo</param>
+            <returns>Lista de modelos disponibles</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IVehiclesService.GetTrimsAsync(System.Int32,System.String,System.String)">
+            <summary>
+            Obtiene la lista de trims (versiones/equipamientos) disponibles para un año, marca y modelo específicos desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <param name="make">Marca del vehículo</param>
+            <param name="model">Modelo del vehículo</param>
+            <returns>Lista de trims disponibles como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.IVehiclesService.GetImageAsync(System.String)">
+            <summary>
+            Obtiene una imagen desde una URL externa
+            </summary>
+            <param name="imageUrl">URL de la imagen a obtener</param>
+            <returns>Tupla con el contenido de la imagen (bytes) y el tipo de contenido (content type)</returns>
+        </member>
+        <member name="T:UyanycarusaService.Services.MakeModelContentService">
+            <summary>
+            Servicio para operaciones de contenido de marca y modelo
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.MakeModelContentService.GetMakeContentAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.MakeModelContentService.GetMakeModelContentAsync(System.String,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.SchedulingService">
+            <summary>
+            Servicio para operaciones de Scheduling (OTP)
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.SchedulingService.RequestOTPAsync(System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.SmsService">
+            <summary>
+            Servicio para operaciones relacionadas con SMS
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.SmsService.SendSmsAsync(UyanycarusaService.Dtos.SmsSendModel)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.TokenService">
+            <summary>
+            Servicio para gestionar tokens de Azure AD con cache
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.TokenService.GetAccessTokenAsync">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.ValuationService">
+            <summary>
+            Servicio para operaciones de valuación de vehículos
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.ValuationService.CreateValuationAsync(System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="M:UyanycarusaService.Services.ValuationService.CreateValuationWithDamageAsync(System.Text.Json.JsonElement)">
+            <inheritdoc />
+        </member>
+        <member name="T:UyanycarusaService.Services.VehiclesService">
+            <summary>
+            Servicio para operaciones relacionadas con vehículos
+            </summary>
+        </member>
+        <member name="M:UyanycarusaService.Services.VehiclesService.GetYearsAsync">
+            <summary>
+            Obtiene la lista de años disponibles de vehículos desde el servicio externo
+            </summary>
+            <returns>Lista de años disponibles</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.VehiclesService.GetMakesAsync(System.Int32)">
+            <summary>
+            Obtiene la lista de marcas disponibles para un año específico desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <returns>Lista de marcas disponibles</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.VehiclesService.GetModelsAsync(System.Int32,System.String)">
+            <summary>
+            Obtiene la lista de modelos disponibles para un año y marca específicos desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <param name="make">Marca del vehículo</param>
+            <returns>Lista de modelos disponibles</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.VehiclesService.GetTrimsAsync(System.Int32,System.String,System.String)">
+            <summary>
+            Obtiene la lista de trims (versiones/equipamientos) disponibles para un año, marca y modelo específicos desde el servicio externo
+            </summary>
+            <param name="year">Año del vehículo</param>
+            <param name="make">Marca del vehículo</param>
+            <param name="model">Modelo del vehículo</param>
+            <returns>Lista de trims disponibles como JSON</returns>
+        </member>
+        <member name="M:UyanycarusaService.Services.VehiclesService.GetImageAsync(System.String)">
+            <summary>
+            Obtiene una imagen desde una URL externa
+            </summary>
+            <param name="imageUrl">URL de la imagen a obtener</param>
+            <returns>Tupla con el contenido de la imagen (bytes) y el tipo de contenido (content type)</returns>
+        </member>
+    </members>
+</doc>

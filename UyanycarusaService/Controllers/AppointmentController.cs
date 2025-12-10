@@ -7,7 +7,7 @@ using UyanycarusaService.Dtos;
 namespace UyanycarusaService.Controllers
 {
     /// <summary>
-    /// Controlador para operaciones de citas (appointments)
+    /// Controller for appointment operations
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
@@ -30,14 +30,14 @@ namespace UyanycarusaService.Controllers
         }
 
         /// <summary>
-        /// Obtiene la disponibilidad de citas para un código postal y vehículo específico
+        /// Gets appointment availability for a specific zip code and vehicle
         /// </summary>
-        /// <param name="zipCode">Código postal (5 dígitos)</param>
-        /// <param name="customerVehicleId">ID del vehículo del cliente</param>
-        /// <returns>Respuesta de disponibilidad del servicio externo</returns>
-        /// <response code="200">Disponibilidad obtenida correctamente</response>
-        /// <response code="401">No autorizado. Se requiere un token JWT válido</response>
-        /// <response code="500">Error al consumir el servicio externo</response>
+        /// <param name="zipCode">Zip code (5 digits)</param>
+        /// <param name="customerVehicleId">Customer vehicle ID</param>
+        /// <returns>Availability response from external service</returns>
+        /// <response code="200">Availability retrieved successfully</response>
+        /// <response code="401">Unauthorized. Valid JWT token required</response>
+        /// <response code="500">Error consuming external service</response>
         [HttpGet("availability/{zipCode}/{customerVehicleId}")]
         [ProducesResponseType(typeof(JsonElement), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -51,19 +51,19 @@ namespace UyanycarusaService.Controllers
             }
             catch (HttpRequestException ex)
             {
-                //_logger.LogWarning(ex, "Error de comunicación con el servicio externo /Appointment/availability");
+                //_logger.LogWarning(ex, "Communication error with external service /Appointment/availability");
                 return StatusCode(500, new
                 {
-                    message = "Error al comunicarse con el servicio externo de disponibilidad",
+                    message = "Error communicating with external availability service",
                     detail = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error inesperado al obtener disponibilidad de citas");
+                //_logger.LogError(ex, "Unexpected error getting appointment availability");
                 return StatusCode(500, new
                 {
-                    message = "Error inesperado al procesar la solicitud de disponibilidad",
+                    message = "Unexpected error processing availability request",
                     detail = ex.Message
                 });
             }

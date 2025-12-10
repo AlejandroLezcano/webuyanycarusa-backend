@@ -29,8 +29,8 @@ namespace UyanycarusaService.Services
         {
             try
             {
-                // _logger.LogInformation("Solicitando código OTP en el servicio externo /scheduling/otp/request");
-                _logger.LogWarning("se va a consumir el servicio externo /scheduling/otp/request con el siguiente body: {Body}", model);
+                // _logger.LogInformation("Requesting OTP code from external service /scheduling/otp/request");
+                _logger.LogWarning("About to consume external service /scheduling/otp/request with the following body: {Body}", model);
                 var accessToken = await _tokenService.GetAccessTokenAsync();
                 var request = new HttpRequestMessage(HttpMethod.Post, "/scheduling/otp/request")
                 {
@@ -41,26 +41,26 @@ namespace UyanycarusaService.Services
                 using var response = await _httpClient.SendAsync(request);
 
                 var content = await response.Content.ReadAsStringAsync();
-                _logger.LogWarning(content, "se obtuvo el siguiente contenido del servicio externo /scheduling/otp/request: {Content}", content);
+                _logger.LogWarning(content, "Received the following content from external service /scheduling/otp/request: {Content}", content);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JsonSerializer.Deserialize<JsonElement>(content);
                     return json;
                 }
 
-                _logger.LogWarning("El servicio externo /scheduling/otp/request retornó un código de estado: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("External service /scheduling/otp/request returned status code: {StatusCode}", response.StatusCode);
 
                 throw new HttpRequestException(
-                    $"Error al solicitar código OTP. StatusCode: {response.StatusCode}, Detail: {content}");
+                    $"Error requesting OTP code. StatusCode: {response.StatusCode}, Detail: {content}");
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Error al comunicarse con el servicio externo /scheduling/otp/request");
+                _logger.LogError(ex, "Error communicating with external service /scheduling/otp/request");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al solicitar código OTP");
+                _logger.LogError(ex, "Unexpected error requesting OTP code");
                 throw;
             }
         }

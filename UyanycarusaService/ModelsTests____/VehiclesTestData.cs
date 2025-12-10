@@ -1,13 +1,13 @@
 namespace UyanycarusaService.ModelsTests
 {
     /// <summary>
-    /// Datos de prueba para vehículos cuando el servicio externo no responde.
-    /// Contiene años, marcas y modelos en un mismo archivo.
+    /// Test data for vehicles when external service doesn't respond.
+    /// Contains years, makes, and models in a single file.
     /// </summary>
     public static class VehiclesTestData
     {
         /// <summary>
-        /// Lista de años de ejemplo a usar en pruebas o como fallback.
+        /// Sample list of years to use in tests or as fallback.
         /// </summary>
         public static readonly IReadOnlyList<int> Years = new List<int>
         {
@@ -21,7 +21,7 @@ namespace UyanycarusaService.ModelsTests
         };
 
         /// <summary>
-        /// Lista de marcas de ejemplo a usar en pruebas o como fallback.
+        /// Sample list of makes to use in tests or as fallback.
         /// </summary>
         public static readonly IReadOnlyList<string> DefaultMakes = new List<string>
         {
@@ -33,8 +33,8 @@ namespace UyanycarusaService.ModelsTests
         };
 
         /// <summary>
-        /// Lista de modelos de ejemplo a usar en pruebas o como fallback.
-        /// No depende de una marca específica, solo sirve para pruebas.
+        /// Sample list of models to use in tests or as fallback.
+        /// Not dependent on a specific make, only for testing purposes.
         /// </summary>
         public static readonly IReadOnlyList<string> DefaultModels = new List<string>
         {

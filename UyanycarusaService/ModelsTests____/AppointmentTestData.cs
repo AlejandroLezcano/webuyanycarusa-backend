@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace UyanycarusaService.ModelsTests
 {
     /// <summary>
-    /// Datos de prueba para respuestas de citas cuando el servicio externo no responde.
+    /// Test data for appointment responses when external service doesn't respond.
     /// </summary>
     public static class AppointmentTestData
     {
@@ -91,25 +91,25 @@ namespace UyanycarusaService.ModelsTests
         }";
 
         /// <summary>
-        /// Obtiene una respuesta de disponibilidad de citas de ejemplo.
+        /// Gets a sample appointment availability response.
         /// </summary>
         public static JsonElement GetAvailability()
             => JsonSerializer.Deserialize<JsonElement>(AvailabilityJson);
 
         /// <summary>
-        /// Obtiene una respuesta de cita reservada de ejemplo.
+        /// Gets a sample booked appointment response.
         /// </summary>
         public static JsonElement GetBookedAppointment()
             => JsonSerializer.Deserialize<JsonElement>(BookedAppointmentJson);
 
         /// <summary>
-        /// Obtiene una respuesta de cita reprogramada de ejemplo.
+        /// Gets a sample rescheduled appointment response.
         /// </summary>
         public static JsonElement GetRescheduledAppointment()
             => JsonSerializer.Deserialize<JsonElement>(RescheduledAppointmentJson);
 
         /// <summary>
-        /// Obtiene una respuesta de cita cancelada de ejemplo.
+        /// Gets a sample cancelled appointment response.
         /// </summary>
         public static JsonElement GetCancelledAppointment()
             => JsonSerializer.Deserialize<JsonElement>(CancelledAppointmentJson);

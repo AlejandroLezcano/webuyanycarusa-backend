@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace UyanycarusaService.ModelsTests
 {
     /// <summary>
-    /// Datos de prueba para respuestas de valuación cuando el servicio externo no responde.
+    /// Test data for valuation responses when external service doesn't respond.
     /// </summary>
     public static class ValuationTestData
     {
@@ -44,13 +44,13 @@ namespace UyanycarusaService.ModelsTests
         }";
 
         /// <summary>
-        /// Obtiene una respuesta de valuación básica de ejemplo.
+        /// Gets a sample basic valuation response.
         /// </summary>
         public static JsonElement GetBasicValuation()
             => JsonSerializer.Deserialize<JsonElement>(BasicValuationJson);
 
         /// <summary>
-        /// Obtiene una respuesta de valuación con daños de ejemplo.
+        /// Gets a sample valuation with damage response.
         /// </summary>
         public static JsonElement GetValuationWithDamage()
             => JsonSerializer.Deserialize<JsonElement>(WithDamageValuationJson);

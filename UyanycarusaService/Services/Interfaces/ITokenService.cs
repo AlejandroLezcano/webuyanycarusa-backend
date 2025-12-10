@@ -1,14 +1,14 @@
 namespace UyanycarusaService.Services
 {
     /// <summary>
-    /// Interfaz para el servicio de gestión de tokens de Azure AD
+    /// Interface for Azure AD token management service
     /// </summary>
     public interface ITokenService
     {
         /// <summary>
-        /// Obtiene un token de acceso válido (desde cache o solicitando uno nuevo)
+        /// Gets a valid access token (from cache or requesting a new one)
         /// </summary>
-        /// <returns>Token de acceso de Azure AD</returns>
+        /// <returns>Azure AD access token</returns>
         Task<string> GetAccessTokenAsync();
     }
 }

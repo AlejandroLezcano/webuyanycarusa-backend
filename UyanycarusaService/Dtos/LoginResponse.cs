@@ -1,17 +1,17 @@
 namespace UyanycarusaService.Dtos
 {
     /// <summary>
-    /// DTO para respuesta de autenticación
+    /// DTO for authentication response
     /// </summary>
     public record LoginResponse
     {
         /// <summary>
-        /// Token JWT para autenticación
+        /// JWT token for authentication
         /// </summary>
         public string Token { get; init; } = string.Empty;
 
         /// <summary>
-        /// Fecha de expiración del token
+        /// Token expiration date
         /// </summary>
         public DateTime ExpiresAt { get; init; }
     }
