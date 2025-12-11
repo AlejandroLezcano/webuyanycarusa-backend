@@ -2,6 +2,7 @@ using UyanycarusaService.Middlewares;
 using UyanycarusaService.Services;
 using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.HttpOverrides;
